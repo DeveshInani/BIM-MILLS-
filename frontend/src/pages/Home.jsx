@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Frames3DBackground from '../components/Frames3DBackground.jsx';
 import {
   ArrowRight,
@@ -10,23 +11,13 @@ import {
   Users,
   Factory,
   Sparkles,
-  TrendingUp,
   ShoppingCart,
-  Zap,
   Shield,
   Globe,
-  Shirt,
-  Lightbulb,
   Palette,
-  Eye,
   Layers,
-  Wind,
-  Flame,
-  Cloud,
   Star,
-  Heart,
-  Flame as Fire,
-  X
+  Zap
 } from 'lucide-react';
 
 // Material/Fabric showcase
@@ -34,28 +25,28 @@ const fabricMaterials = [
   {
     name: "Premium Cotton",
     description: "100% pure cotton with superior breathability",
-    image: "https://images.unsplash.com/photo-1558769132-cb1aea3c6eaa?w=400",
+    image: "",
     features: ["Breathable", "Soft", "Durable"],
     feel: "Premium Feel"
   },
   {
     name: "Polyester Blend",
     description: "Wrinkle-resistant and easy-care blend fabric",
-    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400",
+    image: "",
     features: ["Wrinkle-Free", "Quick-Dry", "Low-Maintenance"],
     feel: "Tech Feel"
   },
   {
     name: "Cotton-Poly Mix",
     description: "Perfect balance of comfort and durability",
-    image: "https://images.unsplash.com/photo-1604006852748-903fccbc4019?w=800&q=80",
+    image: "",
     features: ["Comfortable", "Durable", "Versatile"],
     feel: "Best Feel"
   },
   {
     name: "Heavy Duty Drill",
     description: "Industrial-grade for heavy-duty work",
-    image: "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=400",
+    image: "",
     features: ["Industrial", "Heavy-Duty", "Long-Lasting"],
     feel: "Strong Feel"
   },
@@ -64,32 +55,32 @@ const fabricMaterials = [
 const products = [
   {
     name: "Corporate Uniforms",
-    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+    img: "",
     desc: "Professional uniforms for corporate identity"
   },
   {
     name: "School Uniforms",
-    img: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=400",
+    img: "",
     desc: "Comfortable and durable school wear"
   },
   {
     name: "Medical Apparel",
-    img: "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=400",
+    img: "",
     desc: "Premium scrubs and medical wear"
   },
   {
     name: "Industrial Workwear",
-    img: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400",
+    img: "",
     desc: "Safety-first industrial uniforms"
   },
   {
     name: "Hospitality Uniforms",
-    img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
+    img: "",
     desc: "Elegant hospitality and service wear"
   },
   {
     name: "Premium Fabrics",
-    img: "https://images.unsplash.com/photo-1558769132-cb1aea3c6eaa?w=400",
+    img: "",
     desc: "High-quality fabric collections"
   },
 ];
@@ -97,31 +88,31 @@ const products = [
 const services = [
   {
     icon: <Package className="w-8 h-8" />,
-    title: "Bulk Manufacturing",
-    desc: "Large-scale production with minimum order quantities starting from 100 units"
+    title: "Single Source Solution",
+    desc: "A complete range of fabrics and accessories including ties, socks, belts, and caps."
   },
   {
     icon: <Sparkles className="w-8 h-8" />,
-    title: "Custom Branding",
-    desc: "Personalized printing, embroidery, and logo placement services"
+    title: "Double Edge Brand",
+    desc: "Our promise of industrial-grade quality at accessible wholesale pricing."
   },
   {
     icon: <Truck className="w-8 h-8" />,
     title: "Pan-India Delivery",
-    desc: "Fast and reliable shipping across all Indian states"
+    desc: "Fast and reliable shipping across all Indian states and industries."
   },
   {
     icon: <Shield className="w-8 h-8" />,
     title: "Quality Assurance",
-    desc: "ISO certified processes with rigorous quality checks"
+    desc: "ISO certified processes with more stitches per inch and roomier cuts."
   },
 ];
 
 const stats = [
-  { label: "Years Experience", value: 25, suffix: "+" },
-  { label: "Happy Clients", value: 500, suffix: "+" },
-  { label: "Annual Production", value: 12000, suffix: " tons" },
-  { label: "Countries Served", value: 15, suffix: "+" },
+  { label: "Global Presence", value: "40", suffix: " Years" },
+  { label: "Happy Cliens", value: 500, suffix: "+" },
+  { label: "Annual Production", value: "1M+", suffix: " Meters" },
+  { label: "States Served", value: 15, suffix: "+" },
 ];
 
 const testimonials = [
@@ -159,7 +150,6 @@ const testimonials = [
 
 const features = [
   "Premium Grade Fabrics",
-  "ISO Certified Manufacturing",
   "Advanced Machinery & Technology",
   "Skilled Workforce of 200+",
   "Custom Design & Branding",
@@ -172,170 +162,338 @@ const features = [
 
 export default function Home({ mode = 'light' }) {
   const navigate = useNavigate();
-  const [hoveredCard, setHoveredCard] = useState(null);
   const [selectedFabric, setSelectedFabric] = useState(0);
-  const [scrollY, setScrollY] = useState(0);
   const darkMode = mode === 'dark';
 
 
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <div className={`${darkMode ? 'bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950' : 'bg-white'} transition-all duration-500 overflow-hidden`}>
 
-      {/* Hero Section with 3D */}
+      {/* Hero Section with 3D Image Sequence */}
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <Frames3DBackground />
-        
+
+        {/* Cinematic Overlay - Dark Gradient to make text pop */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/60 z-[1]" />
+
         {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full animate-blob blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500/10 rounded-full animate-blob animation-delay-2000 blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-cyan-500/5 rounded-full animate-blob animation-delay-4000 blur-3xl"></div>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+              x: [0, 50, 0],
+              y: [0, -30, 0]
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-20 left-10 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px]"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.2, 0.4, 0.2],
+              x: [0, -50, 0],
+              y: [0, 30, 0]
+            }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px]"
+          />
         </div>
 
         {/* Main Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <div className="animate-fade-in-up">
-            {/* Badge */}
-            <div className={`inline-block mb-6 px-6 py-3 ${darkMode ? 'bg-blue-500/20 border border-blue-400/30' : 'bg-white/20 border border-white/30'} backdrop-blur-md rounded-full text-sm font-semibold shadow-lg hover:scale-105 transition-transform duration-300 animate-pulse`}>
-              <span>✨</span> Premium Textile Manufacturing Since 1995
-            </div>
+        <div className="relative z-[10] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            {/* Premium Badge */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="inline-flex items-center gap-2 mb-8 px-5 py-2 rounded-full glass-card-dark text-blue-200 text-sm font-medium tracking-wide border border-white/10"
+            >
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span className="uppercase tracking-widest">Premium Textile Excellence</span>
+            </motion.div>
 
-            {/* Main Title with Explosion Animation */}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
-              <span className={`${darkMode ? 'text-white drop-shadow-2xl' : 'text-white drop-shadow-xl'} inline-block`}>
+            {/* Main Title with Premium Gradient */}
+            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tight">
+              <span className="block text-white drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                 BIM MILLS
               </span>
-              <br />
-              <span className={`${darkMode ? 'bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-400' : 'bg-gradient-to-r from-blue-100 via-white to-blue-200'} bg-clip-text text-transparent animate-gradient`}>
-                Textile Excellence
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 animate-gradient pb-4">
+                TEXTILES
               </span>
             </h1>
 
-            <p className={`text-lg sm:text-xl md:text-2xl mb-10 ${darkMode ? 'text-blue-100' : 'text-blue-50'} max-w-3xl mx-auto font-medium leading-relaxed animate-fade-in-up`} style={{animationDelay: '0.2s'}}>
-              Premium fabrics crafted for perfection. From corporate wear to industrial uniforms,
-              <br />
-              we deliver excellence in every stitch.
-            </p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="text-lg sm:text-xl md:text-2xl mb-12 text-blue-100/80 max-w-3xl mx-auto font-light leading-relaxed tracking-wide"
+            >
+              Engineering the finest fabrics for the world's leading industries.
+              <span className="block mt-2 font-medium text-white italic">Precision in every thread, excellence in every yard.</span>
+            </motion.p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center mb-16">
-              <button onClick={() => navigate('/products')} className={`group px-10 py-5 ${darkMode ? 'bg-white/30 text-white hover:bg-white/50' : 'bg-white/60 text-blue-700 hover:bg-white/80'} rounded-2xl font-semibold text-lg transition-all transform hover:scale-105 shadow-xl backdrop-blur-lg flex items-center gap-3 relative overflow-hidden border border-white/30 animate-fade-in-up`} style={{animationDelay: '0.4s'}}>
-                <span className="relative z-10">Explore Products</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform relative z-10" />
-                <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-white/10 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              </button>
-              <button onClick={() => navigate('/contact')} className={`px-10 py-5 bg-transparent border-2 ${darkMode ? 'border-blue-300 text-blue-100 hover:bg-blue-400/20' : 'border-white text-white hover:bg-white/20'} backdrop-blur-sm rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-lg animate-fade-in-up`} style={{animationDelay: '0.6s'}}>
-                Request Quote
-              </button>
+            {/* CTA Buttons - Premium Styled */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
+              <motion.button
+                whileHover={{ scale: 1.05, translateY: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/products')}
+                className="group relative px-10 py-5 bg-blue-600 text-white rounded-2xl font-bold text-lg overflow-hidden transition-all shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="relative z-10 flex items-center gap-3">
+                  Explore Collection
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05, translateY: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/contact')}
+                className="px-10 py-5 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl font-bold text-lg transition-all"
+              >
+                Request Consultation
+              </motion.button>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {/* Stats - Grid layout with glassmorphism */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-6xl mx-auto">
               {stats.map((stat, idx) => (
-                <div
+                <motion.div
                   key={idx}
-                  className={`group bg-white/95 backdrop-blur-xl rounded-3xl p-6 border-2 ${darkMode ? 'border-white/20' : 'border-white/40'} transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:-translate-y-2 cursor-pointer animate-fade-in-up`}
-                  style={{animationDelay: `${0.8 + idx * 0.1}s`}}
-                  onMouseEnter={() => setHoveredCard(idx)}
-                  onMouseLeave={() => setHoveredCard(null)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 + idx * 0.1, duration: 0.5 }}
+                  className="group glass-card-dark p-6 md:p-8 rounded-[2rem] hover:bg-white/10 transition-all duration-500 cursor-pointer border border-white/5"
                 >
-                  <div className={`text-4xl sm:text-5xl font-black mb-2 ${darkMode ? 'text-blue-600' : 'text-blue-600'} transition-all duration-300 ${hoveredCard === idx ? 'scale-110' : ''}`}>
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 tracking-tighter">
                     {stat.value}{stat.suffix}
                   </div>
-                  <div className={`text-sm font-semibold ${darkMode ? 'text-gray-600' : 'text-gray-600'}`}>{stat.label}</div>
-                </div>
+                  <div className="text-xs sm:text-sm font-medium text-blue-300/60 uppercase tracking-widest">
+                    {stat.label}
+                  </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className={`w-8 h-12 border-2 ${darkMode ? 'border-blue-300/60' : 'border-white/60'} rounded-full flex justify-center p-2`}>
-            <div className={`w-1.5 h-4 ${darkMode ? 'bg-blue-300/60' : 'bg-white/60'} rounded-full animate-scroll`}></div>
+        {/* Animated Scroll Indicator */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[10]">
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center p-1"
+          >
+            <div className="w-1 h-2 bg-blue-400 rounded-full" />
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Products Section */}
+      <div className={`py-32 ${darkMode ? 'bg-slate-950' : 'bg-gradient-to-b from-blue-50 to-white'} relative overflow-hidden`}>
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-24"
+          >
+            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${darkMode ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-blue-100 text-blue-600'} text-xs font-bold tracking-widest uppercase mb-6`}>
+              <Zap className="w-3 h-3" /> Our Collection
+            </div>
+            <h2 className={`text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'} tracking-tight`}>
+              Product <span className="text-gradient">Range</span>
+            </h2>
+            <p className={`text-xl ${darkMode ? 'text-blue-300/60' : 'text-gray-600'} max-w-2xl mx-auto font-light`}>
+              Industrial-grade uniforms and precision-crafted fabrics designed for versatility and durability.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {products.map((product, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                onClick={() => navigate('/products')}
+                className={`group relative glass-card-dark rounded-[2.5rem] overflow-hidden transition-all duration-700 cursor-pointer border border-white/5 hover:border-blue-500/30`}
+              >
+                <div className="relative h-80 overflow-hidden">
+                  <img
+                    src={product.img}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out shadow-2xl"
+                  />
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500`} />
+
+                  {/* Floating Action Badge */}
+                  <div className="absolute top-6 right-6 px-4 py-2 glass-card-dark rounded-2xl text-[10px] font-black uppercase tracking-widest text-white border border-white/20 shadow-2xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500">
+                    View Details
+                  </div>
+                </div>
+
+                <div className="p-10 relative">
+                  {/* Decorative number */}
+                  <div className="absolute top-10 right-10 text-8xl font-black text-white/[0.03] pointer-events-none group-hover:text-blue-500/10 transition-colors">
+                    0{idx + 1}
+                  </div>
+
+                  <h3 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'} group-hover:text-blue-400 transition-colors`}>
+                    {product.name}
+                  </h3>
+                  <p className={`mb-8 text-lg font-light leading-relaxed ${darkMode ? 'text-white/60' : 'text-gray-600'}`}>
+                    {product.desc}
+                  </p>
+
+                  <div className="flex items-center gap-2 text-blue-400 font-black text-sm tracking-widest uppercase group/btn">
+                    Explore <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* FABRIC SHOWCASE SECTION - NEW */}
-      <div className={`py-32 ${darkMode ? 'bg-gradient-to-b from-blue-950/50 to-slate-900/50' : 'bg-gradient-to-b from-blue-50 to-white'} relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
-            <div className={`inline-block px-6 py-2 ${darkMode ? 'bg-blue-500/10 border border-blue-400/30 text-blue-400' : 'bg-blue-100 border border-blue-200 text-blue-600'} rounded-full text-sm font-bold mb-6 animate-pulse`}>
-              ✨ MATERIALS & FABRICS ✨
-            </div>
-            <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-              Premium Material Selection
-            </h2>
-            <p className={`text-xl ${darkMode ? 'text-blue-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-              Feel the difference in every fabric we offer
-            </p>
-          </div>
+      {/* FABRIC SHOWCASE SECTION */}
+      <div className={`py-32 ${darkMode ? 'bg-slate-950' : 'bg-white'} relative overflow-hidden`}>
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-24"
+          >
+            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${darkMode ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-indigo-100 text-indigo-600'} text-xs font-bold tracking-widest uppercase mb-6`}>
+              <Layers className="w-3 h-3" /> Masterful Engineering
+            </div>
+            <h2 className={`text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'} tracking-tight`}>
+              The <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Art of Fabric</span>
+            </h2>
+            <p className={`text-xl ${darkMode ? 'text-blue-300/60' : 'text-gray-600'} max-w-2xl mx-auto font-light`}>
+              Experience the tactile excellence of our premium textile selection.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             {/* Fabric Details */}
-            <div className="order-2 lg:order-1">
-              <div className={`${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-3xl p-12 shadow-2xl hover:shadow-3xl transition-all duration-500`}>
-                <div className="flex items-center gap-4 mb-6">
-                  <Palette className={`w-12 h-12 ${darkMode ? 'text-blue-400' : 'text-blue-600'} animate-spin-slow`} />
-                  <h3 className={`text-4xl font-black ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {fabricMaterials[selectedFabric].name}
-                  </h3>
-                </div>
-                <p className={`text-lg mb-6 ${darkMode ? 'text-blue-200' : 'text-gray-700'}`}>
-                  {fabricMaterials[selectedFabric].description}
-                </p>
-                <div className="flex gap-3 mb-8 flex-wrap">
-                  {fabricMaterials[selectedFabric].features.map((feature, idx) => (
-                    <span key={idx} className={`px-4 py-2 rounded-full text-sm font-bold ${darkMode ? 'bg-blue-500/30 text-blue-200' : 'bg-blue-100 text-blue-700'}`}>
-                      ✓ {feature}
-                    </span>
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="lg:col-span-5 order-2 lg:order-1"
+            >
+              <div className="relative">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={selectedFabric}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="glass-card-dark p-12 rounded-[3.5rem] border border-white/10 relative z-10 overflow-hidden"
+                  >
+                    {/* Animated background highlights */}
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full" />
+                    <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full" />
+
+                    <div className="flex items-center gap-5 mb-8">
+                      <div className="w-16 h-16 rounded-2xl glass-card-dark flex items-center justify-center border border-white/20">
+                        <Palette className="w-8 h-8 text-blue-400" />
+                      </div>
+                      <h3 className="text-4xl font-bold text-white tracking-tight">
+                        {fabricMaterials[selectedFabric].name}
+                      </h3>
+                    </div>
+
+                    <p className="text-xl text-blue-100/60 mb-10 leading-relaxed font-light italic">
+                      "{fabricMaterials[selectedFabric].description}"
+                    </p>
+
+                    <div className="grid grid-cols-1 gap-4 mb-12">
+                      {fabricMaterials[selectedFabric].features.map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-4 bg-white/[0.03] p-4 rounded-2xl border border-white/5">
+                          <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                            <Star className="w-3 h-3 text-blue-400" />
+                          </div>
+                          <span className="text-sm font-bold text-white uppercase tracking-widest">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 rounded-[2rem] shadow-2xl">
+                      <div className="text-[10px] text-white/60 font-black uppercase tracking-[0.3em] mb-2">Tactile Signature</div>
+                      <div className="text-2xl font-black text-white flex items-center gap-3">
+                        <Zap className="w-6 h-6 text-cyan-300" />
+                        {fabricMaterials[selectedFabric].feel}
+                      </div>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </motion.div>
+
+            {/* Fabric Selector & Large Image */}
+            <div className="lg:col-span-7 order-1 lg:order-2">
+              <div className="relative group">
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={selectedFabric}
+                      initial={{ opacity: 0, rotateY: -10 }}
+                      animate={{ opacity: 1, rotateY: 0 }}
+                      exit={{ opacity: 0, rotateY: 10 }}
+                      transition={{ duration: 0.7 }}
+                      className="relative rounded-[4rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-4 border-white/5"
+                    >
+                      <img
+                        src={fabricMaterials[selectedFabric].image}
+                        alt={fabricMaterials[selectedFabric].name}
+                        className="w-full h-[600px] object-cover scale-105 group-hover:scale-100 transition-transform duration-[2s]"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Vertical Fabric Selector */}
+                <div className="absolute -left-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
+                  {fabricMaterials.map((fabric, idx) => (
+                    <motion.button
+                      key={idx}
+                      whileHover={{ scale: 1.1, x: 5 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setSelectedFabric(idx)}
+                      className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl border ${selectedFabric === idx
+                        ? 'bg-blue-600 text-white border-blue-400 scale-110 z-10'
+                        : 'glass-card-dark text-white/40 border-white/5 hover:text-white hover:border-white/20'
+                        }`}
+                    >
+                      <Layers className="w-6 h-6" />
+                    </motion.button>
                   ))}
                 </div>
-                <div className={`p-6 rounded-2xl ${darkMode ? 'bg-blue-500/20 border border-blue-400/30' : 'bg-blue-50 border border-blue-200'}`}>
-                  <p className={`text-sm ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>FEEL</p>
-                  <p className={`text-2xl font-black ${darkMode ? 'text-blue-200' : 'text-blue-700'}`}>
-                    {fabricMaterials[selectedFabric].feel}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Fabric Image Carousel */}
-            <div className="order-1 lg:order-2">
-              <div className="relative">
-                <img
-                  src={fabricMaterials[selectedFabric].image}
-                  alt={fabricMaterials[selectedFabric].name}
-                  className="w-full h-96 object-cover rounded-3xl shadow-2xl animate-pulse-slow"
-                />
-                <div className={`absolute inset-0 rounded-3xl bg-gradient-to-t ${darkMode ? 'from-blue-950 via-transparent to-transparent' : 'from-blue-900/50 via-transparent to-transparent'}`}></div>
-              </div>
-
-              {/* Fabric Selector */}
-              <div className="grid grid-cols-2 gap-4 mt-8">
-                {fabricMaterials.map((fabric, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedFabric(idx)}
-                    className={`p-4 rounded-2xl transition-all duration-300 transform ${
-                      selectedFabric === idx
-                        ? `${darkMode ? 'bg-blue-500 shadow-lg shadow-blue-500/50' : 'bg-blue-600 shadow-lg shadow-blue-500/50'} scale-105 text-white`
-                        : `${darkMode ? 'bg-blue-900/40 hover:bg-blue-900/60 text-blue-200' : 'bg-blue-100 hover:bg-blue-200 text-blue-700'}`
-                    } font-bold text-sm border-2 ${selectedFabric === idx ? 'border-blue-300' : darkMode ? 'border-blue-500/30' : 'border-blue-200'}`}
-                  >
-                    <Layers className="w-4 h-4 inline mr-2" />
-                    {fabric.name}
-                  </button>
-                ))}
               </div>
             </div>
           </div>
@@ -343,214 +501,210 @@ export default function Home({ mode = 'light' }) {
       </div>
 
       {/* Services Section */}
-      <div className={`py-24 ${darkMode ? 'bg-slate-900/50' : 'bg-white/80'} backdrop-blur-sm relative`}>
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className={`py-32 ${darkMode ? 'bg-slate-950' : 'bg-white'} relative overflow-hidden`}>
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
-            <div className={`inline-block px-6 py-2 ${darkMode ? 'bg-blue-500/10 border border-blue-400/30 text-blue-400' : 'bg-blue-100 border border-blue-200 text-blue-600'} rounded-full text-sm font-bold mb-6`}>
-              WHAT WE OFFER
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-24"
+          >
+            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${darkMode ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-blue-100 text-blue-600'} text-xs font-bold tracking-widest uppercase mb-6`}>
+              <Star className="w-3 h-3" /> Business Solutions
             </div>
-            <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-              Our Services
+            <h2 className={`text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'} tracking-tight`}>
+              Specialized <span className="text-gradient">Services</span>
             </h2>
-            <p className={`text-xl ${darkMode ? 'text-blue-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-              Comprehensive textile solutions for businesses of all sizes
-            </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((service, idx) => (
-              <div
+              <motion.div
                 key={idx}
-                className={`group ${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30 hover:border-blue-400/60' : 'bg-white border-blue-100 hover:border-blue-300'} border-2 rounded-3xl p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 cursor-pointer backdrop-blur-sm relative overflow-hidden`}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="group relative glass-card-dark rounded-[2rem] p-10 border border-white/5 hover:border-blue-500/40 transition-all duration-500"
               >
-                <div className={`absolute inset-0 ${darkMode ? 'bg-gradient-to-br from-blue-500/0 to-blue-500/10' : 'bg-gradient-to-br from-blue-50/0 to-blue-100/50'} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-
-                <div className={`relative z-10 w-20 h-20 ${darkMode ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-blue-500 to-blue-600'} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 text-white shadow-lg shadow-blue-500/50`}>
+                <div className="w-20 h-20 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-8 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
                   {service.icon}
                 </div>
-                <h3 className={`relative z-10 text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-blue-400 transition-colors">
                   {service.title}
                 </h3>
-                <p className={`relative z-10 ${darkMode ? 'text-blue-200' : 'text-gray-600'} leading-relaxed`}>
+                <p className="text-blue-100/60 leading-relaxed font-light">
                   {service.desc}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Products Section */}
-      <div className={`py-24 ${darkMode ? 'bg-gradient-to-b from-slate-950 to-blue-950/30' : 'bg-gradient-to-b from-blue-50 to-white'} relative`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className={`inline-block px-6 py-2 ${darkMode ? 'bg-blue-500/10 border border-blue-400/30 text-blue-400' : 'bg-blue-100 border border-blue-200 text-blue-600'} rounded-full text-sm font-bold mb-6`}>
-              OUR COLLECTION
-            </div>
-            <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-              Product Range
-            </h2>
-            <p className={`text-xl ${darkMode ? 'text-blue-300' : 'text-gray-600'}`}>
-              Premium uniforms and fabrics for every industry
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product, idx) => (
-              <div
-                key={idx}
-                className={`group ${darkMode ? 'bg-gradient-to-br from-blue-900/30 to-slate-900/50' : 'bg-white'} rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-4 cursor-pointer border-2 ${darkMode ? 'border-blue-500/20 hover:border-blue-400/50' : 'border-blue-100 hover:border-blue-300'} animate-fade-in`}
-                style={{animationDelay: `${idx * 0.1}s`}}
-              >
-                <div className="relative h-72 overflow-hidden">
-                  <img
-                    src={product.img}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700"
-                  />
-                  <div className={`absolute inset-0 ${darkMode ? 'bg-gradient-to-t from-blue-950 via-blue-950/50 to-transparent' : 'bg-gradient-to-t from-blue-900/80 via-blue-900/30 to-transparent'}`}></div>
-
-                  {/* Floating Badge */}
-                  <div className={`absolute top-4 right-4 px-4 py-2 ${darkMode ? 'bg-blue-500/90' : 'bg-white/90'} backdrop-blur-md rounded-full text-xs font-bold ${darkMode ? 'text-white' : 'text-blue-600'} shadow-lg animate-bounce`}>
-                    Premium
-                  </div>
-                </div>
-                <div className="p-8">
-                  <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {product.name}
-                  </h3>
-                  <p className={`mb-6 ${darkMode ? 'text-blue-200' : 'text-gray-600'} leading-relaxed`}>
-                    {product.desc}
-                  </p>
-                  <button className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} font-bold flex items-center gap-2 group-hover:gap-4 transition-all`}>
-                    Learn More <ArrowRight className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Why Choose Us */}
-      <div className={`py-24 ${darkMode ? 'bg-slate-900/50' : 'bg-blue-50/50'} backdrop-blur-sm relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className={`py-32 ${darkMode ? 'bg-slate-950' : 'bg-blue-50/50'} relative overflow-hidden backdrop-blur-3xl`}>
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className={`inline-block px-6 py-2 ${darkMode ? 'bg-blue-500/10 border border-blue-400/30 text-blue-400' : 'bg-blue-100 border border-blue-200 text-blue-600'} rounded-full text-sm font-bold mb-6`}>
-                WHY US
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${darkMode ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-blue-100 text-blue-600'} text-xs font-bold tracking-widest uppercase mb-8`}>
+                <Award className="w-3 h-3" /> Reliable Partner
               </div>
-              <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-8 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                Why Choose BIM Mills?
+              <h2 className={`text-6xl font-black mb-8 ${darkMode ? 'text-white' : 'text-gray-900'} tracking-tight leading-none`}>
+                The <span className="text-gradient">BIM Mills</span> Edge
               </h2>
-              <p className={`text-xl mb-10 ${darkMode ? 'text-blue-200' : 'text-gray-600'} leading-relaxed`}>
-                We're not just a textile manufacturer – we're your trusted partner in creating quality uniforms and fabrics at scale.
+              <p className={`text-2xl mb-12 ${darkMode ? 'text-blue-100/60' : 'text-gray-600'} font-light leading-relaxed`}>
+                Combining decades of craftsmanship with industrial precision to deliver unmatched textile quality.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {features.map((feature, idx) => (
-                  <div key={idx} className={`flex items-start gap-4 p-4 rounded-2xl ${darkMode ? 'hover:bg-blue-900/20' : 'hover:bg-white/80'} transition-all duration-300 group cursor-pointer hover:scale-110 transform`}>
-                    <CheckCircle className={`w-7 h-7 ${darkMode ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0 mt-1 group-hover:scale-125 transition-transform`} />
-                    <span className={`${darkMode ? 'text-blue-100' : 'text-gray-700'} font-semibold`}>{feature}</span>
-                  </div>
+                  <motion.div
+                    key={idx}
+                    whileHover={{ x: 10 }}
+                    className="flex items-center gap-4 group cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500 transition-colors">
+                      <CheckCircle className="w-4 h-4 text-blue-400 group-hover:text-white transition-colors" />
+                    </div>
+                    <span className="text-white/80 font-medium tracking-wide">{feature}</span>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className={`${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group`}>
-                <Factory className={`w-16 h-16 ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-6 group-hover:scale-110 transition-transform`} />
-                <h3 className={`text-4xl font-black mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>50K+</h3>
-                <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>Units Monthly</p>
-              </div>
-              <div className={`${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group mt-10`}>
-                <Users className={`w-16 h-16 ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-6 group-hover:scale-110 transition-transform`} />
-                <h3 className={`text-4xl font-black mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>200+</h3>
-                <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>Skilled Workers</p>
-              </div>
-              <div className={`${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group`}>
-                <Award className={`w-16 h-16 ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-6 group-hover:scale-110 transition-transform`} />
-                <h3 className={`text-4xl font-black mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>ISO</h3>
-                <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>Certified</p>
-              </div>
-              <div className={`${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group mt-10`}>
-                <Globe className={`w-16 h-16 ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-6 group-hover:scale-110 transition-transform`} />
-                <h3 className={`text-4xl font-black mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>15+</h3>
-                <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>Countries</p>
-              </div>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="grid grid-cols-2 gap-6 perspective-1000"
+            >
+              {[
+                { icon: <Factory />, value: "50K+", label: "Units Monthly" },
+                { icon: <Users />, value: "200+", label: "Skilled Experts", mt: true },
+                { icon: <Shield />, value: "ISO", label: "Certified Ops" },
+                { icon: <Globe />, value: "15+", label: "States Served", mt: true }
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  whileHover={{ rotateY: -10, rotateX: 5, translateZ: 20 }}
+                  className={`glass-card-dark p-8 rounded-[2.5rem] border border-white/10 ${item.mt ? 'mt-12' : ''} transition-all duration-500 shadow-2xl`}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 mb-6">
+                    {item.icon}
+                  </div>
+                  <div className="text-4xl font-black text-white mb-1">{item.value}</div>
+                  <div className="text-xs font-bold text-blue-300/40 uppercase tracking-widest">{item.label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </div>
 
-      {/* Testimonials Carousel */}
-      <div className={`py-24 ${darkMode ? 'bg-gradient-to-b from-blue-950/30 to-slate-950' : 'bg-gradient-to-b from-white to-blue-50'}`}>
+      {/* Testimonials Section */}
+      <div className={`py-32 ${darkMode ? 'bg-slate-950' : 'bg-gradient-to-b from-white to-blue-50'} overflow-hidden`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className={`inline-block px-6 py-2 ${darkMode ? 'bg-blue-500/10 border border-blue-400/30 text-blue-400' : 'bg-blue-100 border border-blue-200 text-blue-600'} rounded-full text-sm font-bold mb-6`}>
-              TESTIMONIALS
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-24"
+          >
+            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${darkMode ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' : 'bg-yellow-100 text-yellow-600'} text-[10px] font-black tracking-widest uppercase mb-6`}>
+              <Star className="w-3 h-3 fill-current" /> Trusted Globally
             </div>
-            <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-              What Our Clients Say
+            <h2 className={`text-5xl md:text-6xl font-black mb-6 ${darkMode ? 'text-white' : 'text-gray-900'} tracking-tight`}>
+              Client <span className="text-gradient">Voices</span>
             </h2>
-            <p className={`text-xl ${darkMode ? 'text-blue-300' : 'text-gray-600'}`}>
-              Trusted by businesses across India
-            </p>
-          </div>
+          </motion.div>
 
-          {/* Carousel */}
-          <div className="relative overflow-x-hidden">
-            <div className="flex gap-8 animate-testimonial-carousel" style={{width: 'max-content'}}>
+          <div className="relative">
+            <div className="flex gap-8 animate-testimonial-carousel hover:[animation-play-state:paused] cursor-grab active:cursor-grabbing" style={{ width: 'max-content' }}>
               {[...testimonials, ...testimonials].map((testimonial, idx) => (
-                <div
+                <motion.div
                   key={idx}
-                  className={`${darkMode ? 'bg-gradient-to-br from-blue-900/30 to-slate-900/50 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-3xl p-8 min-w-[340px] max-w-xs hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group relative overflow-hidden`}
-                  style={{flex: '0 0 340px'}}
+                  whileHover={{ scale: 1.02, translateY: -5 }}
+                  className="glass-card-dark p-10 rounded-[3rem] min-w-[400px] border border-white/5 relative group overflow-hidden"
                 >
-                  <div className={`absolute top-0 right-0 w-32 h-32 ${darkMode ? 'bg-blue-500/5' : 'bg-blue-100/50'} rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500`}></div>
-                  <div className="flex gap-1 mb-6 relative z-10">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
+
+                  <div className="flex gap-1 mb-8">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <span key={i} className={`${darkMode ? 'text-yellow-400' : 'text-yellow-500'} text-2xl`}>★</span>
+                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
                     ))}
                   </div>
-                  <p className={`mb-6 italic text-lg leading-relaxed ${darkMode ? 'text-blue-100' : 'text-gray-700'} relative z-10`}>
+
+                  <p className="text-xl italic font-light leading-relaxed text-blue-100/80 mb-10">
                     "{testimonial.text}"
                   </p>
-                  <div className="relative z-10">
-                    <p className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'}`}>{testimonial.name}</p>
-                    <p className={`text-sm ${darkMode ? 'text-blue-300' : 'text-blue-600'} font-semibold`}>{testimonial.company}</p>
+
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-xl">
+                      {testimonial.name[0]}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-lg tracking-wide">{testimonial.name}</h4>
+                      <p className="text-sm font-black text-blue-400 uppercase tracking-widest">{testimonial.company}</p>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Final CTA */}
-      <div className="relative py-28 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-10 w-full flex flex-col justify-center items-center">
-          <div className="backdrop-blur-xl bg-black/30 w-full py-16 shadow-2xl border-t border-b border-white/20 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 leading-tight text-white drop-shadow-xl animate-pulse">
-              Ready to Experience Excellence?
+      {/* Final CTA Section */}
+      <div className="relative py-40 flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-slate-950 z-0" />
+        <div className="absolute inset-0 z-10 opacity-40">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950" />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative z-20 max-w-5xl mx-auto px-4 text-center"
+        >
+          <div className="glass-card-dark py-24 px-12 rounded-[4rem] border border-white/10 shadow-[0_50px_100px_-30px_rgba(0,0,0,0.7)]">
+            <h2 className="text-5xl md:text-7xl font-black mb-8 text-white tracking-tighter leading-none">
+              Ready to Weave <br />
+              <span className="text-gradient">Your Future?</span>
             </h2>
-            <p className="text-lg sm:text-xl md:text-2xl mb-8 text-blue-100 max-w-2xl mx-auto font-medium">
-              Join thousands of businesses relying on BIM Mills for premium uniforms and fabrics.
+            <p className="text-xl md:text-2xl mb-12 text-blue-100/60 font-light max-w-2xl mx-auto">
+              Partner with BIM Mills today and experience the pinnacle of industrial textile engineering.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-2xl mx-auto">
-              <button onClick={() => navigate('/shop')} className="group px-8 py-4 bg-white text-blue-600 hover:bg-blue-50 font-bold text-lg sm:text-xl transition-all transform hover:scale-110 shadow-2xl hover:shadow-blue-500/50 flex items-center justify-center gap-3 relative overflow-hidden w-full sm:w-auto">
-                <ShoppingCart className="w-6 h-6 relative z-10" />
-                <span className="relative z-10">Shop Now</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              </button>
-              <button onClick={() => navigate('/contact')} className="px-8 py-4 bg-transparent border-2 border-blue-300 text-blue-100 hover:bg-blue-400/20 backdrop-blur-sm font-bold text-lg sm:text-xl transition-all hover:scale-105 shadow-lg w-full sm:w-auto">
-                Contact Sales
-              </button>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/shop')}
+                className="group px-12 py-5 bg-white text-blue-600 rounded-2xl font-black text-xl shadow-2xl flex items-center justify-center gap-3 transition-all"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                Shop Now
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/contact')}
+                className="px-12 py-5 bg-transparent border-2 border-white/20 text-white rounded-2xl font-black text-xl hover:bg-white/5 transition-all"
+              >
+                Get Quotation
+              </motion.button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <style jsx>{`

@@ -50,6 +50,9 @@ export default function AdminLogin({ onLoginSuccess }) {
         elevation={6}
         sx={{ padding: 4, width: "100%", maxWidth: 400, borderRadius: 3 }}
       >
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <img src="/images/logo.jpg" alt="Logo" style={{ height: "60px", width: "auto", borderRadius: "8px" }} />
+        </Box>
         <Typography variant="h5" fontWeight="bold" textAlign="center" mb={2}>
           Admin Login
         </Typography>

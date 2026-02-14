@@ -14,6 +14,7 @@ class Settings:
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
     USE_CREDENTIALS: bool = True
+    USER_STATUS_KEY: bool = True
     
     # Website domain for email links
     WEBSITE_DOMAIN: str = os.getenv("WEBSITE_DOMAIN", "http://localhost:3000")

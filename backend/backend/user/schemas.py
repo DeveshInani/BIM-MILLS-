@@ -28,6 +28,7 @@ class EnquiryCreate(BaseModel):
     phone: Union[str, int]  # ✅ accepts both
     email: EmailStr
     company: Optional[str] = None
+    subject: Optional[str] = None
     message: str = Field(..., min_length=10, max_length=1000)
 
     @validator("phone", pre=True)

@@ -43,6 +43,7 @@ def admin_notification_template(data):
             <tr><td><strong>Email:</strong></td><td>{data.email}</td></tr>
             <tr><td><strong>Phone:</strong></td><td>{data.phone}</td></tr>
             <tr><td><strong>Company:</strong></td><td>{data.company}</td></tr>
+            <tr><td><strong>Subject:</strong></td><td>{data.subject or "General Enquiry"}</td></tr>
             <tr><td><strong>Message:</strong></td><td>{data.message}</td></tr>
           </table>
 

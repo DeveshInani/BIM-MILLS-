@@ -16,38 +16,45 @@ import {
   Briefcase,
   X
 } from 'lucide-react';
+import WhatsAppButton from "../components/WhatsAppButton";
 
 const contactInfo = [
   {
     icon: <Building2 className="w-6 h-6" />,
     title: "Company",
     value: "BIM Mills Pvt. Ltd.",
-    description: "Premium Textile Manufacturing"
+    description: "Quality Textile Manufacturing"
   },
   {
     icon: <Mail className="w-6 h-6" />,
     title: "Email",
-    value: "contact@bimmills.com",
-    description: "We reply within 24 hours"
+    value: "vijayinani839@gmail.com",
+    description: "Write us for enquiries"
   },
   {
     icon: <Phone className="w-6 h-6" />,
-    title: "Phone",
-    value: "+91 98765 43210",
-    description: "Mon-Sat, 9AM-6PM IST"
+    title: "Phone (Ichalkaranji)",
+    value: "0230-2424470",
+    description: "Landline Support"
+  },
+  {
+    icon: <Phone className="w-6 h-6" />,
+    title: "Mobile",
+    value: "+91 9890915839",
+    description: "Direct Sales & WhatsApp"
   },
   {
     icon: <MapPin className="w-6 h-6" />,
-    title: "Location",
-    value: "India",
-    description: "Global Operations"
+    title: "Official Address",
+    value: "18/471, Industrial Estate, Ichalkaranji - 416115",
+    description: "Behind Sonya Maruti Mandir"
   }
 ];
 
 const quickStats = [
   { icon: <Clock className="w-8 h-8" />, value: "24hrs", label: "Response Time" },
   { icon: <Users className="w-8 h-8" />, value: "500+", label: "Happy Clients" },
-  { icon: <Globe className="w-8 h-8" />, value: "15+", label: "Countries" }
+  { icon: <Globe className="w-8 h-8" />, value: "15+", label: "States" }
 ];
 
 export default function Contact({ mode = 'light' }) {
@@ -193,17 +200,12 @@ export default function Contact({ mode = 'light' }) {
               ))}
             </div>
 
-            {/* Additional Info */}
-            <div className={`${darkMode ? 'bg-gradient-to-r from-blue-900/40 to-blue-800/40 border-blue-500/30' : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200'} border-2 rounded-2xl p-6`}>
-              <h3 className={`text-lg font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                Business Hours
-              </h3>
-              <p className={`${darkMode ? 'text-blue-200' : 'text-gray-700'}`}>
-                Monday - Saturday: 9:00 AM - 6:00 PM IST<br />
-                Sunday: Closed
-              </p>
-            </div>
+            <p className={`${darkMode ? 'text-blue-200' : 'text-gray-700'}`}>
+              Monday - Saturday: 9:00 AM - 6:00 PM IST<br />
+              Sunday: Closed
+            </p>
           </div>
+
 
           {/* Right Side - Contact Form */}
           <div className="lg:col-span-3">
@@ -268,7 +270,7 @@ export default function Contact({ mode = 'light' }) {
                       value={form.phone}
                       onChange={handleChange}
                       required
-                      placeholder="+91 98765 43210"
+                      placeholder="+91 9890915839"
                       className={`w-full px-5 py-4 rounded-xl border-2 ${darkMode
                         ? 'bg-blue-950/50 border-blue-500/30 text-white placeholder-blue-400/50 focus:border-blue-400'
                         : 'bg-white border-blue-200 text-gray-900 placeholder-gray-400 focus:border-blue-500'
@@ -346,6 +348,41 @@ export default function Contact({ mode = 'light' }) {
           </div>
         </div>
       </div>
+
+      {/* New Global CTA Section requested */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className={`rounded-3xl p-12 text-white shadow-2xl relative overflow-hidden text-center ${darkMode ? 'bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900' : 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600'}`}>
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <h2 className="text-4xl font-black mb-6">
+              Need Custom Fabric Solutions?
+            </h2>
+            <p className={`text-xl mb-8 leading-relaxed ${darkMode ? 'text-blue-100' : 'text-blue-50'}`}>
+              Our expert team is ready to help with bulk orders, custom designs, and enterprise fabric solutions tailored to your specific requirements.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-8">
+              <div className="flex items-center gap-3">
+                <div className="text-3xl">📧</div>
+                <div className="text-xl font-bold">vijayinani839@gmail.com</div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-3xl">📞</div>
+                <div className="text-xl font-bold">+91 9890915839</div>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <WhatsAppButton
+                label="Connect via whatsapp"
+                message="Hi, I want to discuss a custom fabric solution."
+                darkMode={darkMode}
+                className="text-lg px-8 py-4 bg-[#25D366] text-white hover:bg-[#20bd5a]"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       {/* Success Modal */}
       {openSuccess && (

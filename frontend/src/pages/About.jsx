@@ -7,10 +7,7 @@ import {
   Shield,
   Sparkles,
   Factory,
-  Globe,
   Heart,
-  Zap,
-  Target,
   ArrowRight,
   CheckCircle2
 } from 'lucide-react';
@@ -19,7 +16,7 @@ const milestones = [
   { year: "1995", title: "Founded", desc: "BIM Mills established" },
   { year: "2005", title: "Expansion", desc: "New manufacturing facility" },
   { year: "2015", title: "ISO Certified", desc: "Quality standards achieved" },
-  { year: "2025", title: "Global Reach", desc: "15+ countries served" }
+  { year: "2025", title: "National Reach", desc: "15+ states served" }
 ];
 
 const values = [
@@ -48,7 +45,7 @@ export default function About({ mode = 'light' }) {
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1558769132-cb1aea3c6eaa?w=1600&q=80')`,
+            backgroundImage: `url('')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             transform: `translateY(${scrollY * 0.5}px)`,
@@ -104,7 +101,7 @@ export default function About({ mode = 'light' }) {
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1604006852748-903fccbc4019?w=1600&q=80')`,
+            backgroundImage: `url('')`,
             backgroundSize: '400px',
             backgroundRepeat: 'repeat',
           }}
@@ -117,7 +114,7 @@ export default function About({ mode = 'light' }) {
               <div className={`absolute inset-0 ${darkMode ? 'bg-blue-600' : 'bg-blue-500'} rounded-3xl blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500`}></div>
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transform group-hover:scale-105 group-hover:rotate-2 transition-all duration-500">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80"
+                  src=""
                   alt="Uniform Solutions"
                   className="w-full h-[500px] object-cover"
                 />
@@ -151,11 +148,11 @@ export default function About({ mode = 'light' }) {
               </h2>
 
               <p className={`text-xl ${darkMode ? 'text-blue-200' : 'text-gray-600'} leading-relaxed`}>
-                A uniform is a type of clothing worn by members of an organization. BIM Mills has a long-standing tradition of supplying premium uniform fabrics and complete uniform solutions for schools, hospitals, corporates, hotels and institutions across the country.
+                BIM Mills has a long-standing tradition of providing quality uniform fabrics across the country. Our promoters have been dedicated to this sector for almost four decades, launching the <b>e-fab</b> brand with a vision to fulfill long-awaited demand for a high-quality brand in the organized sector.
               </p>
 
               <div className="grid grid-cols-2 gap-4 pt-6">
-                {['Schools', 'Hospitals', 'Corporates', 'Hotels'].map((item, idx) => (
+                {['Security Agencies', 'School Uniforms', 'Corporate Wear', 'Industrial Setup'].map((item, idx) => (
                   <div key={idx} className={`${darkMode ? 'bg-blue-900/30 border-blue-500/30' : 'bg-blue-50 border-blue-200'} border-2 rounded-2xl p-4 hover:scale-105 transition-transform cursor-pointer group`}>
                     <CheckCircle2 className={`w-6 h-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-2 group-hover:scale-110 transition-transform`} />
                     <div className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{item}</div>
@@ -163,6 +160,18 @@ export default function About({ mode = 'light' }) {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Market Insight Section */}
+      <div className={`py-24 ${darkMode ? 'bg-slate-950' : 'bg-blue-50/30'}`}>
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className={`text-3xl md:text-5xl font-black mb-8 ${darkMode ? 'text-white' : 'text-gray-900'}`}>What the <span className="text-gradient">Market Says</span></h2>
+          <div className="glass-card-dark p-12 rounded-[3.5rem] border border-white/5 shadow-2xl">
+            <p className="text-xl md:text-2xl font-light text-blue-100/70 leading-relaxed italic">
+              "In a segment where price is a big factor, quality is often compromised. We launched <b>e-fab</b> as a <u>double edge brand</u>—satisfying the need for premium quality without the exponential cost increase, breaking the cycle of cheap, low-standard alternatives."
+            </p>
           </div>
         </div>
       </div>
@@ -177,22 +186,22 @@ export default function About({ mode = 'light' }) {
             {/* Content - Reversed Order */}
             <div className="space-y-6 lg:order-2">
               <div className={`inline-block px-4 py-2 ${darkMode ? 'bg-blue-500/10 border border-blue-400/30 text-blue-400' : 'bg-blue-100 border border-blue-200 text-blue-600'} rounded-full text-sm font-bold`}>
-                ONE-STOP SOLUTION
+                THE E-FAB ADVANTAGE
               </div>
 
               <h2 className={`text-4xl sm:text-5xl md:text-6xl font-black ${darkMode ? 'text-white' : 'text-gray-900'} leading-tight`}>
-                Single Source Manufacturing
+                Single Source Uniform Solution
               </h2>
 
               <p className={`text-xl ${darkMode ? 'text-blue-200' : 'text-gray-600'} leading-relaxed`}>
-                Beyond garments, BIM Mills provides accessories such as ties, belts, socks, caps, shoes, sportswear, sweaters and blazers. This makes us a true single-source uniform solution provider for virtually every occupation.
+                We produce unrivaled styling, comfort, and durability. Our fabrics feature <b>wearer-friendly roomier cuts</b>, <b>more stitches per inch</b>, and premium construction that ensures long-lasting performance in any occupation.
               </p>
 
               {/* Product Categories with Icons */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
                 {[
                   { icon: '👔', label: 'Ties' },
-                  { icon: '🧢', label: 'Caps' },
+                  { icon: '🧦', label: 'Socks' },
                   { icon: '👟', label: 'Shoes' },
                   { icon: '🧥', label: 'Blazers' }
                 ].map((item, idx) => (
@@ -209,7 +218,7 @@ export default function About({ mode = 'light' }) {
               <div className={`absolute inset-0 ${darkMode ? 'bg-cyan-600' : 'bg-cyan-500'} rounded-3xl blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500`}></div>
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transform group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500">
                 <img
-                  src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80"
+                  src=""
                   alt="Manufacturing"
                   className="w-full h-[500px] object-cover"
                 />
@@ -281,7 +290,7 @@ export default function About({ mode = 'light' }) {
               <div className={`absolute inset-0 ${darkMode ? 'bg-blue-600' : 'bg-blue-500'} rounded-3xl blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500`}></div>
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transform group-hover:scale-105 group-hover:rotate-2 transition-all duration-500">
                 <img
-                  src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80"
+                  src=""
                   alt="Quality"
                   className="w-full h-[500px] object-cover"
                 />

@@ -6,7 +6,9 @@ from backend.email.send_email import send_custom_email
 from pydantic import BaseModel
 from typing import Optional, List
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+from backend.auth.dependencies import get_current_admin
+
+router = APIRouter(prefix="/admin", tags=["Admin"], dependencies=[Depends(get_current_admin)])
 
 @router.get("/enquiries")
 def get_enquiries(db: Session = Depends(get_db)):
@@ -103,9 +105,15 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
 class FabricCreate(BaseModel):
     name: str
     description: str
-    price: int
+    price: Optional[int] = 0
+    rate: Optional[float] = None
     quantity: Optional[str] = None
     quality: Optional[str] = None
+    quality_code: Optional[str] = None
+    fabric_type: Optional[str] = None
+    usage_area: Optional[str] = None
+    fabric_gsm: Optional[str] = None
+    fabric_width: Optional[str] = None
     image: Optional[str] = None
     file: Optional[str] = None
     category: Optional[str] = None
@@ -117,21 +125,30 @@ def get_fabrics(db: Session = Depends(get_db)):
 
 @router.post("/fabrics")
 def create_fabric(fabric: FabricCreate, db: Session = Depends(get_db)):
-    # Product model corresponds to Bulk Fabrics
+    print(f"Creating fabric: {fabric.name}")
+    print(f"PDF file path: {fabric.file}")
+    
     new_fabric = Product(
         name=fabric.name,
         description=fabric.description,
         price=fabric.price,
+        rate=fabric.rate,
         quantity=fabric.quantity,
         quality=fabric.quality,
+        quality_code=fabric.quality_code,
+        fabric_type=fabric.fabric_type,
+        usage_area=fabric.usage_area,
+        fabric_gsm=fabric.fabric_gsm,
+        fabric_width=fabric.fabric_width,
         image=fabric.image,
-        file=fabric.file,
+        file=fabric.file,  # This should contain the path like "bimillscatalogue/filename.pdf"
         category=fabric.category,
         features=fabric.features
     )
     db.add(new_fabric)
     db.commit()
     db.refresh(new_fabric)
+    print(f"Fabric created with ID: {new_fabric.id}, file: {new_fabric.file}")
     return new_fabric
 
 @router.put("/fabrics/{fabric_id}")
@@ -140,18 +157,72 @@ def update_fabric(fabric_id: int, fabric: FabricCreate, db: Session = Depends(ge
     if not db_fabric:
         raise HTTPException(status_code=404, detail="Fabric not found")
     
+    print(f"Updating fabric ID: {fabric_id}, name: {fabric.name}")
+    print(f"PDF file path: {fabric.file}")
+    
     db_fabric.name = fabric.name
     db_fabric.description = fabric.description
     db_fabric.price = fabric.price
+    db_fabric.rate = fabric.rate
     db_fabric.quantity = fabric.quantity
     db_fabric.quality = fabric.quality
+    db_fabric.quality_code = fabric.quality_code
+    db_fabric.fabric_type = fabric.fabric_type
+    db_fabric.usage_area = fabric.usage_area
+    db_fabric.fabric_gsm = fabric.fabric_gsm
+    db_fabric.fabric_width = fabric.fabric_width
     db_fabric.image = fabric.image
-    db_fabric.file = fabric.file
+    db_fabric.file = fabric.file  # This should contain the path like "bimillscatalogue/filename.pdf"
     db_fabric.category = fabric.category
     db_fabric.features = fabric.features
     
     db.commit()
+    db.refresh(db_fabric)
+    print(f"Fabric updated, file: {db_fabric.file}")
     return db_fabric
+
+from fastapi import File, UploadFile
+import os
+import shutil
+
+@router.post("/fabrics/upload-pdf")
+async def upload_fabric_pdf(file: UploadFile = File(...)):
+    """
+    Upload PDF file to frontend/public/bimmills_catalogue folder
+    Returns the relative path that will be stored in database
+    """
+    # Get the project root directory (assuming backend is in backend/backend/)
+    # Go up two levels from this file to reach project root
+    current_file = os.path.abspath(__file__)
+    backend_dir = os.path.dirname(os.path.dirname(current_file))  # backend/
+    project_root = os.path.dirname(backend_dir)  # project root (bim-mills/)
+    
+    # Path to frontend/public/bimmills_catalogue (the actual folder name)
+    upload_dir = os.path.join(project_root, "frontend", "public", "bimmills_catalogue")
+    
+    # Create directory if it doesn't exist
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir, exist_ok=True)
+        print(f"Created directory: {upload_dir}")
+    
+    # Sanitize filename to prevent path traversal and URL issues (replace spaces with underscores)
+    safe_filename = os.path.basename(file.filename).replace(" ", "_").replace("%20", "_")
+    
+    # Full path to save the file
+    file_path = os.path.join(upload_dir, safe_filename)
+    
+    # Save the file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        print(f"File saved successfully to: {file_path}")
+        
+        # Return path relative to public folder (for serving from frontend)
+        # This will be stored in database as: bimmills_catalogue/filename.pdf
+        return {"file_url": f"bimmills_catalogue/{safe_filename}", "message": "File uploaded successfully"}
+    except Exception as e:
+        print(f"Error saving file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
 @router.delete("/fabrics/{fabric_id}")
 def delete_fabric(fabric_id: int, db: Session = Depends(get_db)):

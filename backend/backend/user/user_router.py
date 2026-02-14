@@ -43,14 +43,27 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 def login_user(credentials: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == credentials.email).first()
 
+
     if not user or not Hash.verify(user.password, credentials.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
 
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Account is inactive")
+
     token = create_access_token({"sub": user.email, "role": "user"})
     return {"access_token": token, "token_type": "bearer"}
+
+from backend.auth.dependencies import get_current_user
+
+@router.get("/me")
+def get_current_user_profile(current_user: User = Depends(get_current_user)):
+    """
+    Get current user profile. Access restricted to the authenticated user.
+    """
+    return current_user
 
 
 # SUBMIT ENQUIRY

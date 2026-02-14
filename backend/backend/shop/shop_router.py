@@ -64,8 +64,51 @@ def get_catalogue_products(db: Session = Depends(get_db)):
             "category": f.category,
             "features": (f.features or "").split(",") if f.features else [],
             "image": f.image,
-            "file": f.file
+            "file": f.file,
+            "rate": f.rate,
+            "quality_code": f.quality_code,
+            "fabric_type": f.fabric_type,
+            "usage_area": f.usage_area,
+            "gsm": f.fabric_gsm,
+            "width": f.fabric_width
         }
         for f in fabrics
     ]
 
+from fastapi.responses import FileResponse, StreamingResponse
+import os
+
+@router.get("/pdf/{product_id}", tags=["Catalogue"])
+def serve_catalogue_pdf(product_id: int, db: Session = Depends(get_db)):
+    """Serve PDF from the catalogue folder with robust headers"""
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product or not product.file:
+        return {"error": "PDF not found for this product"}
+    
+    # Extract filename and ensure it's normalized (underscores)
+    raw_path = product.file.replace('bimillscatalogue', 'bimmills_catalogue')
+    filename = raw_path.split("/")[-1].replace(" ", "_").replace("%20", "_")
+    
+    # Path to frontend/public/bimmills_catalogue
+    current_file = os.path.abspath(__file__)
+    # shop_router.py is in backend/backend/shop/
+    backend_root = os.path.dirname(os.path.dirname(os.path.dirname(current_file))) # backend/
+    project_root = os.path.dirname(backend_root)
+    
+    file_path = os.path.join(project_root, "frontend", "public", "bimmills_catalogue", filename)
+    
+    if not os.path.exists(file_path):
+        # Try one more: maybe it's just in the folder without the bimmills_catalogue prefix
+        alternative_path = os.path.join(project_root, "frontend", "public", filename)
+        if os.path.exists(alternative_path):
+            file_path = alternative_path
+        else:
+            print(f"File not found on disk: {file_path}")
+            return {"error": "File not found on disk"}
+
+    return FileResponse(
+        path=file_path,
+        media_type='application/pdf',
+        filename=filename,
+        content_disposition_type='inline' # Try to show in browser first
+    )

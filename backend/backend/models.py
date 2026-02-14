@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Boolean
 from datetime import datetime
 import sys
 from pathlib import Path
@@ -23,6 +23,7 @@ class User(Base):
     phone = Column(String(255))
     email = Column(String(255), unique=True)
     password = Column(String(255))
+    is_active = Column(Boolean, default=True)
 
 
 class Enquiry(Base):
@@ -33,6 +34,7 @@ class Enquiry(Base):
     phone = Column(String(20), nullable=False)
     company = Column(String(255), nullable=True)
     email = Column(String(255), nullable=False)
+    subject = Column(String(255), nullable=True)
     message = Column(String(1000), nullable=False)
 
 class Product(Base):
@@ -40,9 +42,15 @@ class Product(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
     description = Column(String(1000))
-    price = Column(Integer)
+    price = Column(Integer, default=0)
+    rate = Column(Float, nullable=True)
     quantity = Column(String(255), nullable=True)
     quality = Column(String(1000), nullable=True)
+    quality_code = Column(String(255), nullable=True)
+    fabric_type = Column(String(255), nullable=True) # p/c/pv/pc
+    usage_area = Column(String(255), nullable=True)
+    fabric_gsm = Column(String(255), nullable=True)
+    fabric_width = Column(String(255), nullable=True)
     image = Column(String(1000), nullable=True)
     file = Column(String(1000), nullable=True) # PDF Link
     category = Column(String(255), nullable=True)
@@ -55,6 +63,7 @@ class ReadymadeProduct(Base):
     quantity = Column(String(255), nullable=False)
     quality = Column(String(255), nullable=False)
     price = Column(Integer, nullable=True)
+    image = Column(String(1000), nullable=True)
 
 class Order(Base):
     __tablename__ = "orders"

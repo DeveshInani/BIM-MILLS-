@@ -6,9 +6,7 @@ import {
   CreditCard,
   LogOut,
   Plus,
-  Search,
   Bell,
-  MoreVertical,
   CheckCircle,
   X,
   Trash2,
@@ -58,23 +56,33 @@ export default function AdminBoard({ mode = 'light' }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className={`h-16 flex items-center justify-between px-8 border-b z-10 relative ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-          <h2 className="text-xl font-bold capitalize">{activeTab}</h2>
-          <div className="flex items-center gap-4">
+        <header className={`h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b z-10 relative ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <h2 className="text-lg sm:text-xl font-bold capitalize truncate">{activeTab}</h2>
+          <div className="flex items-center gap-2 sm:gap-4">
             <button className={`p-2 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
-              <Bell className="w-5 h-5" />
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm">
                 A
               </div>
-              <span className="font-medium">Admin</span>
+              <span className="hidden sm:inline font-medium">Admin</span>
             </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem('adminToken');
+                window.location.href = '/admin/login';
+              }}
+              className={`p-2 rounded-full ${darkMode ? 'hover:bg-red-900/20 text-red-400' : 'hover:bg-red-50 text-red-600'} transition-colors`}
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
           </div>
         </header>
 
         {/* Dynamic Content */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {activeTab === 'dashboard' && <DashboardView darkMode={darkMode} />}
           {activeTab === 'products' && <ProductsView darkMode={darkMode} />}
           {activeTab === 'email' && <EmailView darkMode={darkMode} />}
@@ -93,9 +101,9 @@ export default function AdminBoard({ mode = 'light' }) {
 function Sidebar({ activeTab, setActiveTab, darkMode }) {
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'products', icon: ShoppingBag, label: 'Products' },
+    { id: 'products', icon: ShoppingBag, label: 'Shop Items' },
     { id: 'email', icon: Mail, label: 'Email Center' },
-    { id: 'fabrics', icon: Layers, label: 'Fabrics Catalogue' },
+    { id: 'fabrics', icon: Layers, label: 'Fabric Catalogue' },
     { id: 'payments', icon: Receipt, label: 'Customer Invoices' },
     { id: 'vendor-payments', icon: HandCoins, label: 'Vendor Payments' },
     { id: 'billing', icon: CreditCard, label: 'Billing & Plan' },
@@ -129,8 +137,14 @@ function Sidebar({ activeTab, setActiveTab, darkMode }) {
       </div>
 
       <div className="p-4 border-t border-gray-700/10">
-        <button className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${darkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'
-          }`}>
+        <button
+          onClick={() => {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin/login';
+          }}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${darkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'
+            }`}
+        >
           <LogOut className="w-5 h-5" />
           <span className="font-medium">Logout</span>
         </button>
@@ -526,7 +540,7 @@ function ProductsView({ darkMode }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-bold">Product Management</h3>
+        <h3 className="text-2xl font-bold">Shop Items Management</h3>
         <button
           onClick={() => { setEditingId(null); setFormData({ name: '', price: '', quantity: '', quality: '', collection: '' }); setIsModalOpen(true); }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -1050,9 +1064,15 @@ function FabricsView({ darkMode }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    price: '',
+    price: 0,
+    rate: '',
     quantity: '',
     quality: '',
+    quality_code: '',
+    fabric_type: '',
+    usage_area: '',
+    fabric_gsm: '',
+    fabric_width: '',
     image: '',
     file: '',
     category: '',
@@ -1077,18 +1097,43 @@ function FabricsView({ darkMode }) {
     e.preventDefault();
     setLoading(true);
     try {
+      // Log form data before submission for debugging
+      console.log('Submitting fabric data:', formData);
+      console.log('PDF file path:', formData.file);
+
       if (editingId) {
-        await api.put(`/admin/fabrics/${editingId}`, formData);
+        const response = await api.put(`/admin/fabrics/${editingId}`, formData);
+        console.log('Fabric updated:', response.data);
       } else {
-        await api.post('/admin/fabrics', formData);
+        const response = await api.post('/admin/fabrics', formData);
+        console.log('Fabric created:', response.data);
       }
+
+      alert('Fabric saved successfully!');
       setIsModalOpen(false);
-      setFormData({ name: '', description: '', price: '', quantity: '', quality: '', image: '', file: '', category: '', features: '' });
+      setFormData({
+        name: '',
+        description: '',
+        price: 0,
+        rate: '',
+        quantity: '',
+        quality: '',
+        quality_code: '',
+        fabric_type: '',
+        usage_area: '',
+        fabric_gsm: '',
+        fabric_width: '',
+        image: '',
+        file: '',
+        category: '',
+        features: ''
+      });
       setEditingId(null);
       fetchFabrics();
     } catch (err) {
-      console.error(err);
-      alert('Failed to save fabric');
+      console.error('Error saving fabric:', err);
+      console.error('Error response:', err.response?.data);
+      alert(`Failed to save fabric: ${err.response?.data?.detail || err.message}`);
     } finally {
       setLoading(false);
     }
@@ -1112,8 +1157,62 @@ function FabricsView({ darkMode }) {
 
   const openAddModal = () => {
     setEditingId(null);
-    setFormData({ name: '', description: '', price: '', quantity: '', quality: '', image: '', file: '', category: '', features: '' });
+    setFormData({
+      name: '',
+      description: '',
+      price: 0,
+      rate: '',
+      quantity: '',
+      quality: '',
+      quality_code: '',
+      fabric_type: '',
+      usage_area: '',
+      fabric_gsm: '',
+      fabric_width: '',
+      image: '',
+      file: '',
+      category: '',
+      features: ''
+    });
     setIsModalOpen(true);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      alert('Please upload a PDF file');
+      return;
+    }
+
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
+
+    try {
+      setLoading(true);
+      console.log('Uploading PDF:', file.name);
+      const res = await api.post('/admin/fabrics/upload-pdf', uploadFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      console.log('PDF upload response:', res.data);
+
+      // Update formData with the file URL returned from backend
+      const fileUrl = res.data.file_url;
+      setFormData(prev => {
+        const updated = { ...prev, file: fileUrl };
+        console.log('Updated formData with file:', updated);
+        return updated;
+      });
+      alert(`PDF Uploaded successfully! File path: ${fileUrl}`);
+    } catch (err) {
+      console.error('PDF upload error:', err);
+      console.error('Error response:', err.response?.data);
+      alert(`Failed to upload PDF: ${err.response?.data?.detail || err.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -1159,7 +1258,7 @@ function FabricsView({ darkMode }) {
                           {f.category || 'Fabric'}
                         </span>
                         {f.file && (
-                          <a href={f.file} target="_blank" rel="noreferrer" className="text-[10px] flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline">
+                          <a href={`/${f.file}`} target="_blank" rel="noreferrer" className="text-[10px] flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline">
                             <FileText className="w-3 h-3" />
                             PDF
                           </a>
@@ -1168,15 +1267,15 @@ function FabricsView({ darkMode }) {
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 font-medium">₹{f.price?.toLocaleString()}</td>
-                <td className="px-6 py-4">{f.quantity || 'N/A'}</td>
                 <td className="px-6 py-4">
-                  <div className="text-sm">{f.quality}</div>
-                  {f.features && (
-                    <div className="text-xs text-gray-500 mt-1 max-w-[150px] truncate" title={f.features}>
-                      {f.features}
-                    </div>
-                  )}
+                  <div className="text-xs font-bold text-blue-500 uppercase">{f.fabric_type || 'N/A'}</div>
+                  <div className="text-xs text-gray-500">{f.usage_area || 'General'}</div>
+                </td>
+                <td className="px-6 py-4 font-bold">₹{f.rate || f.price || 0}</td>
+                <td className="px-6 py-4">
+                  <div className="text-xs">GSM: <span className="font-semibold">{f.fabric_gsm || '-'}</span></div>
+                  <div className="text-xs">Width: <span className="font-semibold">{f.fabric_width || '-'}</span></div>
+                  <div className="text-[10px] text-gray-400 mt-1">Code: {f.quality_code || 'N/A'}</div>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -1234,72 +1333,125 @@ function FabricsView({ darkMode }) {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium mb-1">Fabric Type (p/c/pv/pc)</label>
+                  <input
+                    value={formData.fabric_type}
+                    onChange={e => setFormData({ ...formData, fabric_type: e.target.value })}
+                    placeholder="e.g. PV"
+                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Usage Area</label>
+                  <input
+                    value={formData.usage_area}
+                    onChange={e => setFormData({ ...formData, usage_area: e.target.value })}
+                    placeholder="e.g. School Uniform"
+                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Quality Code</label>
+                  <input
+                    value={formData.quality_code}
+                    onChange={e => setFormData({ ...formData, quality_code: e.target.value })}
+                    placeholder="e.g. 101"
+                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Rate (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.rate}
+                    onChange={e => setFormData({ ...formData, rate: e.target.value })}
+                    placeholder="0.00"
+                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Fabric GSM</label>
+                  <input
+                    value={formData.fabric_gsm}
+                    onChange={e => setFormData({ ...formData, fabric_gsm: e.target.value })}
+                    placeholder="e.g. 200"
+                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Fabric Width</label>
+                  <input
+                    value={formData.fabric_width}
+                    onChange={e => setFormData({ ...formData, fabric_width: e.target.value })}
+                    placeholder='e.g. 58"'
+                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  />
+                </div>
+
+                <div className="col-span-2">
                   <label className="block text-sm font-medium mb-1">Category</label>
                   <input
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="e.g. Shirting, Suiting"
-                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Price (₹)</label>
-                  <input
-                    required
-                    type="number"
-                    value={formData.price}
-                    onChange={e => setFormData({ ...formData, price: e.target.value })}
-                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Image URL</label>
-                  <input
-                    value={formData.image}
-                    onChange={e => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="https://..."
-                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">PDF Catalog Link</label>
-                  <input
-                    value={formData.file}
-                    onChange={e => setFormData({ ...formData, file: e.target.value })}
-                    placeholder="bimmills_catalogue/file.pdf"
-                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Stock/Quantity</label>
-                  <input
-                    value={formData.quantity}
-                    onChange={e => setFormData({ ...formData, quantity: e.target.value })}
-                    placeholder="e.g. 1000 meters"
-                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Quality/Grade</label>
-                  <input
-                    value={formData.quality}
-                    onChange={e => setFormData({ ...formData, quality: e.target.value })}
-                    placeholder="e.g. Premium Cotton"
+                    placeholder="e.g. Suiting"
                     className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
                   />
                 </div>
 
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-1">Features (comma separated)</label>
-                  <input
+                  <textarea
+                    rows={2}
                     value={formData.features}
                     onChange={e => setFormData({ ...formData, features: e.target.value })}
-                    placeholder="e.g. Wrinkle-Free, Anti-pilling, Breathable"
+                    placeholder="Wrinkle Free, Breathable..."
+                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1 font-bold text-blue-500">PDF Catalogue Upload</label>
+                  <div className="flex gap-4 items-center">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="pdf-upload"
+                    />
+                    <label
+                      htmlFor="pdf-upload"
+                      className={`flex-1 p-3 border-2 border-dashed rounded-xl cursor-pointer transition-all ${darkMode ? 'border-gray-600 hover:border-blue-500 bg-gray-700/50' : 'border-gray-300 hover:border-blue-500 bg-gray-50'}`}
+                    >
+                      <div className="flex flex-col items-center gap-1">
+                        <FileText className="w-6 h-6 text-gray-400" />
+                        <span className="text-xs text-gray-500">{formData.file || 'Click to upload PDF catalog'}</span>
+                      </div>
+                    </label>
+                    {formData.file && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, file: '' }))}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1">Image URL</label>
+                  <input
+                    value={formData.image}
+                    onChange={e => setFormData({ ...formData, image: e.target.value })}
+                    placeholder="https://..."
                     className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
                   />
                 </div>
@@ -1322,30 +1474,30 @@ function FabricsView({ darkMode }) {
 
 // --- Payment Management View (Customer Invoices) ---
 function PaymentManagementView({ darkMode }) {
-    // Send Invoice Email Handler
-    const handleSendInvoiceEmail = async (invoice) => {
-      let subject = `Invoice #${invoice.invoice_number} from BIM Mills`;
-      let body = `<p>Dear ${invoice.customer_name},</p>`;
-      if (invoice.payment_status === 'Pending') {
-        body += `<p>Please find your invoice attached. Kindly pay the amount of <b>₹${invoice.total_amount?.toLocaleString()}</b> at your earliest convenience.</p>`;
-      } else if (invoice.payment_status === 'Overdue') {
-        body += `<p><b>Overdue Notice:</b> Your payment for invoice <b>#${invoice.invoice_number}</b> is overdue. Please pay <b>₹${invoice.total_amount?.toLocaleString()}</b> immediately to avoid service interruption.</p>`;
-      } else {
-        body += `<p>Your invoice is attached for your records.</p>`;
-      }
-      body += `<p>Thank you,<br/>BIM Mills Team</p>`;
-      try {
-        await api.post('/admin/send-email', {
-          to_email: invoice.customer_email,
-          subject,
-          body
-        });
-        alert('Invoice email sent successfully!');
-      } catch (err) {
-        alert('Failed to send invoice email.');
-        console.error(err);
-      }
-    };
+  // Send Invoice Email Handler
+  const handleSendInvoiceEmail = async (invoice) => {
+    let subject = `Invoice #${invoice.invoice_number} from BIM Mills`;
+    let body = `<p>Dear ${invoice.customer_name},</p>`;
+    if (invoice.payment_status === 'Pending') {
+      body += `<p>Please find your invoice attached. Kindly pay the amount of <b>₹${invoice.total_amount?.toLocaleString()}</b> at your earliest convenience.</p>`;
+    } else if (invoice.payment_status === 'Overdue') {
+      body += `<p><b>Overdue Notice:</b> Your payment for invoice <b>#${invoice.invoice_number}</b> is overdue. Please pay <b>₹${invoice.total_amount?.toLocaleString()}</b> immediately to avoid service interruption.</p>`;
+    } else {
+      body += `<p>Your invoice is attached for your records.</p>`;
+    }
+    body += `<p>Thank you,<br/>BIM Mills Team</p>`;
+    try {
+      await api.post('/admin/send-email', {
+        to_email: invoice.customer_email,
+        subject,
+        body
+      });
+      alert('Invoice email sent successfully!');
+    } catch (err) {
+      alert('Failed to send invoice email.');
+      console.error(err);
+    }
+  };
   const [invoices, setInvoices] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1496,13 +1648,12 @@ function PaymentManagementView({ darkMode }) {
                     <select
                       value={invoice.payment_status}
                       onChange={(e) => handleStatusChange(invoice.id, e.target.value)}
-                      className={`px-2 py-1 rounded text-xs font-bold border-0 cursor-pointer ${
-                        invoice.payment_status === 'Paid' 
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                          : invoice.payment_status === 'Overdue'
+                      className={`px-2 py-1 rounded text-xs font-bold border-0 cursor-pointer ${invoice.payment_status === 'Paid'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : invoice.payment_status === 'Overdue'
                           ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                           : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                      }`}
+                        }`}
                     >
                       <option value="Pending">Pending</option>
                       <option value="Paid">Paid</option>
@@ -1614,8 +1765,7 @@ function InvoiceTemplate({ invoice, darkMode, onClose }) {
   const handleDownloadPDF = () => {
     // Create a new window for printing/downloading
     const printWindow = window.open('', '_blank');
-    const invoiceContent = document.getElementById('invoice-content').innerHTML;
-    
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -1680,9 +1830,9 @@ function InvoiceTemplate({ invoice, darkMode, onClose }) {
             }
       </html>
     `);
-    
+
     printWindow.document.close();
-    
+
     // Trigger print dialog (which also allows saving as PDF)
     setTimeout(() => {
       printWindow.print();
@@ -1714,19 +1864,27 @@ function InvoiceTemplate({ invoice, darkMode, onClose }) {
             <button onClick={onClose}><X className="w-6 h-6" /></button>
           </div>
         </div>
-        
+
         {/* Invoice Content - Printable */}
         <div className={`p-8 ${darkMode ? 'bg-gray-900' : 'bg-white'} border-2 border-gray-200`} id="invoice-content">
           {/* Header */}
           <div className="mb-8 pb-6 border-b-2 border-gray-300">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                  BIM Mills
-                </h1>
-                <p className="text-gray-600 mt-2">Textile Manufacturing Company</p>
-                <p className="text-sm text-gray-500 mt-1">123 Industrial Area, Textile City</p>
-                <p className="text-sm text-gray-500">Phone: +91-9876543210 | Email: info@bimmills.com</p>
+                <div className="flex items-center gap-4 mb-2">
+                  <img src="/images/logo.jpg" alt="Logo" className="w-16 h-16 object-contain rounded-lg" />
+                  <div>
+                    <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">
+                      BIM MILLS
+                    </h1>
+                    <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-blue-600">Textile Excellence</p>
+                  </div>
+                </div>
+                <p className="text-xs font-bold text-gray-800">18/471, INDUSTRIAL ESTATE,</p>
+                <p className="text-xs text-gray-600">BEHIND SONYA MARUTI MANDIR,</p>
+                <p className="text-xs text-gray-600 font-bold">ICHALKARANJI – 416115</p>
+                <p className="text-xs text-gray-600 mt-1">PH NO. 0230-2424470 | M.NO. 9890915839</p>
+                <p className="text-xs text-gray-600">Email: vijayinani839@gmail.com</p>
               </div>
               <div className="text-right">
                 <h2 className="text-2xl font-bold text-blue-600">INVOICE</h2>
@@ -1965,13 +2123,12 @@ function VendorPaymentsView({ darkMode, refreshKey, triggerGlobalRefresh }) {
                     {payment.due_date ? new Date(payment.due_date).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${
-                      payment.status === 'Paid' 
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : payment.status === 'Pending'
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${payment.status === 'Paid'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      : payment.status === 'Pending'
                         ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                         : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    }`}>
+                      }`}>
                       {payment.status}
                     </span>
                   </td>
@@ -2005,27 +2162,27 @@ function VendorPaymentsView({ darkMode, refreshKey, triggerGlobalRefresh }) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Vendor Name *</label>
-                  <input required value={vendorForm.name} onChange={(e) => setVendorForm({...vendorForm, name: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input required value={vendorForm.name} onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Company Name</label>
-                  <input value={vendorForm.company_name} onChange={(e) => setVendorForm({...vendorForm, company_name: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.company_name} onChange={(e) => setVendorForm({ ...vendorForm, company_name: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Contact Person</label>
-                  <input value={vendorForm.contact_person} onChange={(e) => setVendorForm({...vendorForm, contact_person: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.contact_person} onChange={(e) => setVendorForm({ ...vendorForm, contact_person: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Email</label>
-                  <input type="email" value={vendorForm.email} onChange={(e) => setVendorForm({...vendorForm, email: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input type="email" value={vendorForm.email} onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Phone</label>
-                  <input value={vendorForm.phone} onChange={(e) => setVendorForm({...vendorForm, phone: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.phone} onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Vendor Type</label>
-                  <select value={vendorForm.vendor_type} onChange={(e) => setVendorForm({...vendorForm, vendor_type: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                  <select value={vendorForm.vendor_type} onChange={(e) => setVendorForm({ ...vendorForm, vendor_type: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
                     <option value="">Select Type</option>
                     <option value="Supplier">Supplier</option>
                     <option value="Dealer">Dealer</option>
@@ -2034,32 +2191,32 @@ function VendorPaymentsView({ darkMode, refreshKey, triggerGlobalRefresh }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">GSTIN</label>
-                  <input value={vendorForm.gstin} onChange={(e) => setVendorForm({...vendorForm, gstin: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.gstin} onChange={(e) => setVendorForm({ ...vendorForm, gstin: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">PAN</label>
-                  <input value={vendorForm.pan} onChange={(e) => setVendorForm({...vendorForm, pan: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.pan} onChange={(e) => setVendorForm({ ...vendorForm, pan: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Bank Account</label>
-                  <input value={vendorForm.bank_account} onChange={(e) => setVendorForm({...vendorForm, bank_account: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.bank_account} onChange={(e) => setVendorForm({ ...vendorForm, bank_account: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Bank Name</label>
-                  <input value={vendorForm.bank_name} onChange={(e) => setVendorForm({...vendorForm, bank_name: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.bank_name} onChange={(e) => setVendorForm({ ...vendorForm, bank_name: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">IFSC Code</label>
-                  <input value={vendorForm.ifsc_code} onChange={(e) => setVendorForm({...vendorForm, ifsc_code: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={vendorForm.ifsc_code} onChange={(e) => setVendorForm({ ...vendorForm, ifsc_code: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Address</label>
-                <textarea rows={2} value={vendorForm.address} onChange={(e) => setVendorForm({...vendorForm, address: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                <textarea rows={2} value={vendorForm.address} onChange={(e) => setVendorForm({ ...vendorForm, address: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea rows={2} value={vendorForm.notes} onChange={(e) => setVendorForm({...vendorForm, notes: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                <textarea rows={2} value={vendorForm.notes} onChange={(e) => setVendorForm({ ...vendorForm, notes: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
               </div>
               <button type="submit" className="w-full py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition">Save Vendor</button>
             </form>
@@ -2078,23 +2235,23 @@ function VendorPaymentsView({ darkMode, refreshKey, triggerGlobalRefresh }) {
             <form onSubmit={handlePaymentSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Vendor *</label>
-                <select required value={paymentForm.vendor_id} onChange={(e) => setPaymentForm({...paymentForm, vendor_id: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                <select required value={paymentForm.vendor_id} onChange={(e) => setPaymentForm({ ...paymentForm, vendor_id: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
                   <option value="">Select Vendor</option>
                   {vendors.map(v => <option key={v.id} value={v.id}>{v.name} {v.company_name ? `(${v.company_name})` : ''}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Amount (₹) *</label>
-                <input required type="number" step="0.01" value={paymentForm.amount} onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                <input required type="number" step="0.01" value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea rows={2} value={paymentForm.description} onChange={(e) => setPaymentForm({...paymentForm, description: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                <textarea rows={2} value={paymentForm.description} onChange={(e) => setPaymentForm({ ...paymentForm, description: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Payment Method</label>
-                  <select value={paymentForm.payment_method} onChange={(e) => setPaymentForm({...paymentForm, payment_method: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                  <select value={paymentForm.payment_method} onChange={(e) => setPaymentForm({ ...paymentForm, payment_method: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
                     <option value="">Select Method</option>
                     <option value="Bank Transfer">Bank Transfer</option>
                     <option value="Cash">Cash</option>
@@ -2104,7 +2261,7 @@ function VendorPaymentsView({ darkMode, refreshKey, triggerGlobalRefresh }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Status</label>
-                  <select value={paymentForm.status} onChange={(e) => setPaymentForm({...paymentForm, status: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                  <select value={paymentForm.status} onChange={(e) => setPaymentForm({ ...paymentForm, status: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
                     <option value="Pending">Pending</option>
                     <option value="Paid">Paid</option>
                     <option value="Overdue">Overdue</option>
@@ -2113,20 +2270,20 @@ function VendorPaymentsView({ darkMode, refreshKey, triggerGlobalRefresh }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Due Date</label>
-                  <input type="date" value={paymentForm.due_date} onChange={(e) => setPaymentForm({...paymentForm, due_date: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input type="date" value={paymentForm.due_date} onChange={(e) => setPaymentForm({ ...paymentForm, due_date: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Reference Number</label>
-                  <input value={paymentForm.reference_number} onChange={(e) => setPaymentForm({...paymentForm, reference_number: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={paymentForm.reference_number} onChange={(e) => setPaymentForm({ ...paymentForm, reference_number: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Bill Reference</label>
-                  <input value={paymentForm.bill_reference} onChange={(e) => setPaymentForm({...paymentForm, bill_reference: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                  <input value={paymentForm.bill_reference} onChange={(e) => setPaymentForm({ ...paymentForm, bill_reference: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea rows={2} value={paymentForm.notes} onChange={(e) => setPaymentForm({...paymentForm, notes: e.target.value})} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
+                <textarea rows={2} value={paymentForm.notes} onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })} className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`} />
               </div>
               <button type="submit" className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">Save Payment</button>
             </form>

@@ -1,336 +1,536 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useRef, Suspense, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  FileText,
-  Download,
-  Eye,
-  CheckCircle,
-  Package,
-  Sparkles,
-  TrendingUp,
-  Award,
-  ShoppingBag,
-  ArrowRight,
-  Loader
-} from 'lucide-react';
+import * as THREE from 'three';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Float, PerspectiveCamera, Environment, Html, useTexture } from '@react-three/drei';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Layers, ShieldCheck, FileText, Download, Loader, Send, CheckCircle } from 'lucide-react';
+import WhatsAppButton from '../components/WhatsAppButton';
 import api from '../api/axiosClient';
+import axios from 'axios';
 
-// Static catalog PDFs (keeping these as they are custom files)
-const staticCatalogs = [
-  {
-    title: "Shirting Fabrics",
-    desc: "Premium shirting fabrics for schools, corporates and uniforms",
-    file: "bimmills_catalogue/P.V.SUITING (1).pdf",
-    category: "Shirting",
-    features: ["Wrinkle-Free", "Breathable", "Easy Care"],
-    image: "https://images.unsplash.com/photo-1558769132-cb1aea3c6eaa?w=800&q=80"
-  },
-  {
-    title: "Suiting Fabrics",
-    desc: "Durable suiting fabrics with elegant finishes",
-    file: "bimmills_catalogue/P.V.SUITING (2).pdf",
-    category: "Suiting",
-    features: ["Premium Quality", "Wrinkle Resistant", "Professional Look"],
-    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80"
-  },
-  {
-    title: "Yarn Dyed Fabrics",
-    desc: "Colorfast yarn dyed fabrics with rich texture",
-    file: "bimmills_catalogue/ENIGMA YARN DYED SUTING.pdf",
-    category: "Premium",
-    features: ["Colorfast", "Rich Texture", "Long Lasting"],
-    image: "https://images.unsplash.com/photo-1604006852748-903fccbc4019?w=800&q=80"
-  },
-  {
-    title: "Cotton Drill",
-    desc: "Heavy-duty cotton drill fabrics for industrial wear",
-    file: "bimmills_catalogue/100 COTTON DRILL.pdf",
-    category: "Industrial",
-    features: ["Heavy Duty", "100% Cotton", "Durable"],
-    image: "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=800&q=80"
-  },
-  {
-    title: "Matty Fabrics",
-    desc: "Breathable matty fabrics for comfort uniforms",
-    file: "bimmills_catalogue/E-18 YARN DYED MATTY.pdf",
-    category: "Comfort",
-    features: ["Breathable", "Comfortable", "Uniform Ready"],
-    image: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=800&q=80"
-  },
-  {
-    title: "Enigma Series",
-    desc: "Premium enigma yarn dyed exclusive collection",
-    file: "bimmills_catalogue/ENIGMA YARN DYED SUTING.pdf",
-    category: "Exclusive",
-    features: ["Exclusive", "Premium", "Limited Edition"],
-    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80"
-  },
-];
+// 3D Rotating Fabric Card
+const RotatingFabric = ({ fabric, index }) => {
+  const meshRef = useRef();
+  const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+  const color = colors[index % colors.length];
+
+  // Load thumbnail texture
+  const texture = useTexture('/efab/thumbnail.png', (texture) => {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+  });
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+  });
+
+  return (
+    <Float speed={2} rotationIntensity={0.2} floatIntensity={0.3}>
+      <mesh ref={meshRef}>
+        <boxGeometry args={[3, 4, 0.1]} />
+        <meshStandardMaterial
+          map={texture}
+          color={color}
+          roughness={0.3}
+          metalness={0.5}
+        />
+      </mesh>
+    </Float>
+  );
+};
+
+// 3D Scene Component
+const FabricScene = ({ fabric, index }) => {
+  return (
+    <Suspense fallback={<Html center><div className="text-white font-bold">Loading...</div></Html>}>
+      <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={50} />
+      <OrbitControls enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={2} />
+      <ambientLight intensity={0.7} />
+      <pointLight position={[10, 10, 10]} intensity={2} />
+      <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} />
+      <RotatingFabric fabric={fabric} index={index} />
+      <Environment preset="studio" />
+    </Suspense>
+  );
+};
+
+// Sample Request Modal Component
+const SampleRequestModal = ({ isOpen, onClose, product, darkMode }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    message: `I would like to request a sample for ${product?.title} (${product?.quality_code || product?.quality}).`
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.post('/users/enquiry', {
+        ...formData,
+        subject: "Sample Request"
+      });
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        onClose();
+        setFormData({ name: '', email: '', phone: '', company: '', message: '' });
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to submit sample request:', err);
+      alert('Failed to submit request. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[150] flex items-center justify-center p-6 backdrop-blur-xl bg-slate-950/80"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        onClick={(e) => e.stopPropagation()}
+        className={`relative w-full max-w-lg rounded-3xl p-8 shadow-2xl ${darkMode ? 'bg-slate-900 border border-white/10' : 'bg-white'}`}
+      >
+        <button onClick={onClose} className="absolute top-6 right-6 text-slate-400 hover:text-white">
+          <X size={24} />
+        </button>
+
+        {success ? (
+          <div className="text-center py-12">
+            <CheckCircle size={64} className="text-green-500 mx-auto mb-6" />
+            <h3 className="text-2xl font-black mb-2">Request Submitted!</h3>
+            <p className="text-slate-400">Our team will contact you shortly regarding the samples.</p>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-3xl font-black mb-2 flex items-center gap-3">
+              <Layers className="text-blue-500" />
+              Request Samples
+            </h3>
+            <p className="text-slate-400 mb-8">Professional textile samples for your assessment.</p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                required
+                type="text"
+                placeholder="Full Name"
+                className={`w-full p-4 rounded-xl border ${darkMode ? 'bg-white/5 border-white/10 focus:border-blue-500 text-white' : 'bg-slate-100 border-slate-200 focus:border-blue-600'}`}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  required
+                  type="email"
+                  placeholder="Email"
+                  className={`w-full p-4 rounded-xl border ${darkMode ? 'bg-white/5 border-white/10 focus:border-blue-500 text-white' : 'bg-slate-100 border-slate-200 focus:border-blue-600'}`}
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+                <input
+                  required
+                  type="tel"
+                  placeholder="Phone"
+                  className={`w-full p-4 rounded-xl border ${darkMode ? 'bg-white/5 border-white/10 focus:border-blue-500 text-white' : 'bg-slate-100 border-slate-200 focus:border-blue-600'}`}
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="Company Name"
+                className={`w-full p-4 rounded-xl border ${darkMode ? 'bg-white/5 border-white/10 focus:border-blue-500 text-white' : 'bg-slate-100 border-slate-200 focus:border-blue-600'}`}
+                value={formData.company}
+                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+              />
+              <textarea
+                required
+                rows={4}
+                placeholder="Details of your request..."
+                className={`w-full p-4 rounded-xl border ${darkMode ? 'bg-white/5 border-white/10 focus:border-blue-500 text-white' : 'bg-slate-100 border-slate-200 focus:border-blue-600'}`}
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-4 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest hover:bg-blue-700 transition flex items-center justify-center gap-2"
+              >
+                {submitting ? <Loader className="animate-spin" /> : <Send size={20} />}
+                {submitting ? 'Submitting...' : 'Submit Request'}
+              </button>
+            </form>
+          </>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+};
 
 export default function Products({ mode = 'light' }) {
   const navigate = useNavigate();
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const [productData, setProductData] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedFabric, setSelectedFabric] = useState(null);
+  const [sampleModalProduct, setSampleModalProduct] = useState(null);
   const darkMode = mode === 'dark';
 
-  // Fetch real product data from API
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/api/readymade-products/cat/all');
-        // If API returns products, use them; otherwise use static catalogs
-        if (response.data && response.data.length > 0) {
-          setProductData(response.data);
-        } else {
-          setProductData(staticCatalogs);
-        }
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch products:', err);
-        // Fall back to static catalogs
-        setProductData(staticCatalogs);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
   }, []);
 
-  return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950' : 'bg-white'} transition-all duration-500`}>
-      {/* Hero Section */}
-      <div className={`relative py-20 overflow-hidden ${darkMode ? 'bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900' : 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600'}`}>
-        <div className="absolute inset-0 opacity-20">
-          <div className={`absolute top-0 right-0 w-96 h-96 ${darkMode ? 'bg-cyan-500' : 'bg-white'} rounded-full mix-blend-multiply filter blur-3xl animate-blob`}></div>
-          <div className={`absolute bottom-0 left-0 w-96 h-96 ${darkMode ? 'bg-blue-400' : 'bg-blue-200'} rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000`}></div>
-        </div>
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/api/readymade-products/cat/all');
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <div className={`inline-block mb-6 px-6 py-3 ${darkMode ? 'bg-blue-500/20 border border-blue-400/30' : 'bg-white/20 border border-white/30'} backdrop-blur-md rounded-full text-sm font-semibold shadow-lg`}>
-            <FileText className="w-4 h-4 inline mr-2" />
-            Product Catalog
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6">
-            Premium Fabric Collections
-            <br />
-            <span className={`${darkMode ? 'text-blue-300' : 'text-blue-100'}`}>Download Our Catalogs</span>
-          </h1>
-          <p className={`text-xl max-w-3xl mx-auto ${darkMode ? 'text-blue-100' : 'text-blue-50'}`}>
-            Discover our comprehensive range of premium fabrics with detailed specifications and bulk pricing options
-          </p>
+      const mappedProducts = response.data.map(product => {
+        // Handle PDF path - use bimmills_catalogue folder (the actual folder name)
+        let pdfPath = null;
+        if (product.file) {
+          if (product.file.startsWith('http')) {
+            pdfPath = product.file;
+          } else {
+            // Normalize path: handle both bimmills_catalogue and bimillscatalogue
+            // The actual folder is bimmills_catalogue, so normalize to that
+            let normalizedPath = product.file.replace(/bimillscatalogue/g, 'bimmills_catalogue');
+
+            // Remove leading slash if present (we'll add it back)
+            normalizedPath = normalizedPath.replace(/^\/+/, '');
+
+            // If path already contains bimmills_catalogue, use it as is
+            if (normalizedPath.includes('bimmills_catalogue')) {
+              pdfPath = `/${normalizedPath}`;
+            } else {
+              // Extract just the filename if full path is provided
+              const filename = normalizedPath.split('/').pop();
+              pdfPath = `/bimmills_catalogue/${filename}`;
+            }
+
+            console.log('PDF path normalized:', { original: product.file, normalized: pdfPath });
+          }
+        } else {
+          console.log('No PDF file for product:', product.title || product.name);
+        }
+
+        return {
+          id: product.id,
+          title: product.title || product.name,
+          desc: product.desc || product.description || 'Premium fabric for professional applications.',
+          category: product.category || 'General',
+          quality_code: product.quality_code || null,
+          quality: product.category || 'Professional Grade',
+          gsm: product.gsm || 'N/A',
+          width: product.width || 'N/A',
+          composition: product.fabric_type || 'Premium Blend',
+          safety: product.features || 'Quality Certified',
+          usage: product.usage_area || 'Multi-purpose',
+          image: product.image || '/assets/textures/silk-royale.png',
+          pdf: pdfPath
+        };
+      });
+
+      // Sort by ID descending to show newest first
+      const sortedProducts = mappedProducts.sort((a, b) => b.id - a.id);
+
+      setProducts(sortedProducts);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch products:', err);
+      setError('Unable to load products. Please try again later.');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownloadPDF = async (product) => {
+    if (!product || !product.id) {
+      alert('Product data missing');
+      return;
+    }
+
+    console.log('Opening PDF via Robust Backend Proxy for product:', product.id);
+
+    try {
+      // Use the new backend proxy endpoint
+      const proxyUrl = `/api/readymade-products/pdf/${product.id}?v=${new Date().getTime()}`;
+
+      // Fetch as blob
+      const response = await api.get(proxyUrl, {
+        responseType: 'blob'
+      });
+
+      // Create local Object URL
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Open in new tab
+      const newTab = window.open(blobUrl, '_blank');
+
+      // Fallback if popup blocked
+      if (!newTab) {
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `${product.title.replace(/\s+/g, '_')}_datasheet.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Cleanup
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 15000);
+    } catch (err) {
+      console.error('Error loading PDF via Proxy:', err);
+      alert('Could not open PDF. The file might be missing or the server is busy.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={`min-h-screen w-full flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
+        <div className="text-center">
+          <Loader size={48} className="animate-spin text-blue-600 mx-auto mb-4" />
+          <p className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Loading Products...</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Stats Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { value: "6+", label: "Product Lines", icon: <Package className="w-8 h-8" /> },
-            { value: "1000+", label: "Fabric Designs", icon: <Sparkles className="w-8 h-8" /> },
-            { value: "100%", label: "Quality Assured", icon: <Award className="w-8 h-8" /> }
-          ].map((stat, idx) => (
-            <div
-              key={idx}
-              className={`${darkMode ? 'bg-gradient-to-br from-blue-900/90 to-blue-950/90 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-3xl p-6 backdrop-blur-xl shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-2 group`}
+  if (error) {
+    return (
+      <div className={`min-h-screen w-full flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
+        <div className="text-center max-w-md">
+          <p className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{error}</p>
+          <button onClick={fetchProducts} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all">Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen w-full ${darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
+      {/* Header */}
+      <div className="py-24 px-8 text-center max-w-7xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-6">
+            <ShieldCheck size={14} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Professional Textile Solutions</span>
+          </div>
+          <h1 className="text-7xl font-black mb-6 tracking-tighter uppercase">PRODUCT CATALOGUE<span className="text-blue-600">.</span></h1>
+          <p className={`text-xl max-w-3xl mx-auto leading-relaxed ${darkMode ? 'text-blue-200/50' : 'text-slate-600'}`}>
+            Engineered fabrics for corporate, industrial, and institutional applications.
+            Discover our premium range of PV, PC, and specialized blends.
+          </p>
+        </motion.div>
+      </div>
+
+      {/* Product List - Vertical Alternating Layout */}
+      <div className="max-w-7xl mx-auto px-8 space-y-32 py-12">
+        {products.map((product, index) => {
+          const isEven = index % 2 === 0;
+          return (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-24 items-center`}
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-16 h-16 ${darkMode ? 'bg-blue-600' : 'bg-blue-600'} rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform`}>
-                  {stat.icon}
-                </div>
-                <div>
-                  <div className={`text-4xl font-black ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {stat.value}
-                  </div>
-                  <div className={`text-sm font-semibold ${darkMode ? 'text-blue-300' : 'text-gray-600'}`}>
-                    {stat.label}
-                  </div>
+              {/* Visual Side */}
+              <div className="w-full lg:w-1/2 aspect-square relative group">
+                <div className={`absolute inset-0 rounded-[3rem] blur-3xl opacity-20 transition-all duration-700 group-hover:opacity-40 bg-blue-600`}></div>
+                <div className={`relative w-full h-full rounded-[3rem] overflow-hidden ${darkMode ? 'bg-slate-900/80' : 'bg-slate-100'} border border-white/10 shadow-2xl`}>
+                  <Canvas shadows dpr={[1, 2]}>
+                    <FabricScene fabric={product} index={index} />
+                  </Canvas>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        {/* Catalog Grid */}
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader className="animate-spin" size={40} />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {productData.map((catalog, index) => (
-              <div
-                key={index}
-                onMouseEnter={() => setHoveredCard(index)}
-                onMouseLeave={() => setHoveredCard(null)}
-                className={`group ${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30 hover:border-blue-400/60' : 'bg-white border-blue-100 hover:border-blue-300'} border-2 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 cursor-pointer`}
-              >
-                {/* Header with Fabric Image */}
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={catalog.image || 'https://images.unsplash.com/photo-1558769132-cb1aea3c6eaa?w=800&q=80'}
-                    alt={catalog.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className={`absolute inset-0 ${darkMode ? 'bg-gradient-to-t from-blue-950 via-blue-900/50 to-transparent' : 'bg-gradient-to-t from-blue-900/80 via-blue-600/40 to-transparent'}`}></div>
-
-                  {/* Category Badge */}
-                  <div className={`absolute top-4 right-4 px-4 py-2 ${darkMode ? 'bg-blue-950/90' : 'bg-white/95'} backdrop-blur-md rounded-full text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-blue-600'} shadow-lg`}>
-                    {catalog.category || 'Fabric'}
+              {/* Content Side */}
+              <div className="w-full lg:w-1/2 text-left">
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="px-4 py-1.5 bg-blue-600 rounded-full text-white text-[10px] font-black uppercase tracking-widest">
+                      {product.category}
+                    </span>
+                    {product.quality_code && (
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${darkMode ? 'bg-white/5 text-white/40' : 'bg-slate-200 text-slate-600'}`}>
+                        Code: {product.quality_code}
+                      </span>
+                    )}
                   </div>
 
-                  {/* Fabric Type Label */}
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="bg-white/10 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20">
-                      <h3 className="text-white font-black text-xl">
-                        {catalog.title}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <p className={`text-base mb-4 leading-relaxed ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
-                    {catalog.desc}
+                  <h2 className="text-6xl font-black mb-6 tracking-tight leading-none uppercase">{product.title}</h2>
+                  <p className={`text-xl leading-relaxed mb-8 ${darkMode ? 'text-white/60' : 'text-slate-600'}`}>
+                    {product.desc}
                   </p>
 
-                  {/* Features */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {(catalog.features || ['Premium Quality', 'Durable', 'Professional']).map((feature, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm ${darkMode
-                          ? 'bg-blue-950/50 border border-blue-500/30 text-blue-300'
-                          : 'bg-blue-50 border border-blue-200 text-blue-700'
-                          }`}
-                      >
-                        <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
-                        <span className="font-semibold">{feature}</span>
+                  <div className="grid grid-cols-3 gap-4 mb-8">
+                    <div className={`px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
+                      <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">GSM</p>
+                      <p className="text-lg font-black">{product.gsm || 'N/A'}</p>
+                    </div>
+                    <div className={`px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
+                      <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Width</p>
+                      <p className="text-lg font-black">{product.width || 'N/A'}</p>
+                    </div>
+                    <div className={`px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
+                      <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Blend</p>
+                      <p className="text-xs font-black uppercase">{product.composition || 'Premium'}</p>
+                    </div>
+                  </div>
+
+                  {/* Usage Area Box UI */}
+                  {product.usage && (
+                    <div className="mb-10">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4 ml-1">Key Applications</p>
+                      <div className="flex flex-wrap gap-2.5">
+                        {product.usage.split(',').map((u, i) => (
+                          <span key={i} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all hover:bg-blue-600 hover:text-white ${darkMode ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
+                            {u.trim()}
+                          </span>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Action Buttons */}
-                  <div className="space-y-3">
-                    {/* View Button */}
-                    <a
-                      href={catalog.file || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-blue-500/50 group"
-                    >
-                      <Eye size={20} className="group-hover:scale-110 transition-transform" />
-                      <span>View Catalog</span>
-                    </a>
-
-                    {/* Download Button */}
-                    <a
-                      href={catalog.file || '#'}
-                      download
-                      className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-bold transition-all transform hover:scale-105 ${darkMode
-                        ? 'bg-blue-950/50 border-2 border-blue-500/30 text-blue-300 hover:bg-blue-900/50 hover:border-blue-400/50'
-                        : 'bg-white border-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300'
-                        }`}
-                    >
-                      <Download size={20} />
-                      <span>Download PDF</span>
-                    </a>
-                  </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    onClick={() => setSelectedFabric(product)}
+                    className={`flex-1 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${darkMode ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg'}`}
+                  >
+                    <Layers size={20} /> Technical Specs
+                  </button>
+                  <button
+                    onClick={() => handleDownloadPDF(product)}
+                    className={`flex-1 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${darkMode ? 'bg-blue-600/20 border border-blue-500/30 text-blue-400 hover:bg-blue-600/30' : 'bg-slate-100 border border-slate-200 text-slate-900 hover:bg-slate-200'}`}
+                  >
+                    <FileText size={20} /> Download PDF
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* CTA Section */}
-        <div className={`mt-20 ${darkMode ? 'bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900' : 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600'} rounded-3xl p-12 text-white shadow-2xl relative overflow-hidden`}>
-          <div className="absolute inset-0 opacity-20">
-            <div className={`absolute top-0 right-0 w-96 h-96 ${darkMode ? 'bg-cyan-500' : 'bg-white'} rounded-full mix-blend-multiply filter blur-3xl animate-blob`}></div>
-            <div className={`absolute bottom-0 left-0 w-96 h-96 ${darkMode ? 'bg-blue-400' : 'bg-blue-200'} rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000`}></div>
-          </div>
-
-          <div className="relative z-10 max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl font-black mb-4">
-              Need Custom Fabric Solutions?
-            </h2>
-            <p className={`text-xl mb-8 leading-relaxed ${darkMode ? 'text-blue-100' : 'text-blue-50'}`}>
-              Our expert team is ready to help with bulk orders, custom designs, and enterprise fabric solutions tailored to your specific requirements.
-            </p>
-
-            {/* Contact Info */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-8">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 ${darkMode ? 'bg-blue-800' : 'bg-white/20'} backdrop-blur-sm rounded-full flex items-center justify-center text-2xl`}>
-                  📧
-                </div>
-                <span className="text-lg font-semibold">sales@bimmills.com</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 ${darkMode ? 'bg-blue-800' : 'bg-white/20'} backdrop-blur-sm rounded-full flex items-center justify-center text-2xl`}>
-                  📞
-                </div>
-                <span className="text-lg font-semibold">+91 98765 43210</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => navigate('/contact')}
-              className={`group px-12 py-5 ${darkMode ? 'bg-white text-blue-600 hover:bg-blue-50' : 'bg-white text-blue-600 hover:bg-blue-50'} rounded-2xl font-bold text-xl transition-all transform hover:scale-110 shadow-2xl hover:shadow-blue-500/50 flex items-center justify-center gap-3 mx-auto relative overflow-hidden`}
-            >
-              <span className="relative z-10">Contact Sales Team</span>
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform relative z-10" />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-            </button>
-          </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { icon: "🏭", title: "Manufacturing", desc: "State-of-the-art facilities" },
-            { icon: "🚚", title: "Fast Delivery", desc: "Pan-India shipping" },
-            { icon: "✅", title: "Quality Assured", desc: "ISO certified processes" },
-            { icon: "🎨", title: "Custom Design", desc: "Tailored solutions" }
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className={`${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-blue-950/40 border-blue-500/30' : 'bg-white border-blue-100'} border-2 rounded-2xl p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group cursor-pointer`}
-            >
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</div>
-              <h4 className={`font-bold text-lg mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                {item.title}
-              </h4>
-              <p className={`text-sm ${darkMode ? 'text-blue-300' : 'text-gray-600'}`}>
-                {item.desc}
-              </p>
-            </div>
-          ))}
-        </div>
+            </motion.div>
+          );
+        })}
       </div>
 
-      <style jsx>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -50px) scale(1.1); }
-          50% { transform: translate(-20px, 20px) scale(0.9); }
-          75% { transform: translate(50px, 50px) scale(1.05); }
-        }
-        
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-      `}</style>
+      {/* Fabric Genuineness Section */}
+      <div className="max-w-7xl mx-auto px-8 pb-20 mt-20">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className={`rounded-3xl p-12 ${darkMode ? 'bg-slate-900/50 border border-white/10' : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'}`}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <ShieldCheck className="text-blue-600" size={32} />
+            <h2 className={`text-4xl font-black ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              Why Trust Our Fabrics?
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                Quality Assurance & Certification
+              </h3>
+              <p className={`text-lg leading-relaxed ${darkMode ? 'text-white/70' : 'text-slate-700'}`}>
+                Our fabrics undergo rigorous quality testing and are certified for professional use. We maintain strict quality control standards ensuring every batch meets industry specifications for durability, safety, and performance.
+              </p>
+            </div>
+            <div>
+              <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                Authenticity Guarantee
+              </h3>
+              <p className={`text-lg leading-relaxed ${darkMode ? 'text-white/70' : 'text-slate-700'}`}>
+                We source materials directly from verified suppliers and maintain complete traceability. Every product comes with detailed specifications, quality codes, and certification documentation. Our commitment to transparency ensures you receive genuine, premium-grade textiles.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Tech Specs Modal */}
+      <AnimatePresence>
+        {selectedFabric && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-2xl bg-slate-950/90" onClick={() => setSelectedFabric(null)}>
+            <motion.div initial={{ scale: 0.9, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 50 }} onClick={(e) => e.stopPropagation()} className={`relative w-full max-w-4xl rounded-3xl p-12 shadow-2xl ${darkMode ? 'bg-slate-900 border border-white/10' : 'bg-white'}`}>
+              <button onClick={() => setSelectedFabric(null)} className="absolute top-6 right-6 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition"><X size={20} /></button>
+
+              <div className="flex items-center gap-3 mb-6">
+                <Layers className="text-blue-500" />
+                <span className="px-4 py-1.5 bg-blue-600/20 border border-blue-500/20 text-blue-500 rounded-full text-xs font-black uppercase tracking-widest">{selectedFabric.category}</span>
+              </div>
+
+              <h2 className="text-5xl font-black mb-6 tracking-tight">{selectedFabric.title}<span className="text-blue-600">.</span></h2>
+
+              <div className="grid grid-cols-2 gap-6 mb-12">
+                {[
+                  { label: 'Fabric Weight (GSM)', value: selectedFabric.gsm },
+                  { label: 'Material Composition', value: selectedFabric.composition },
+                  { label: 'Fabric Width', value: selectedFabric.width },
+                  { label: 'Quality Code', value: selectedFabric.quality_code || 'N/A' },
+                  { label: 'Certifications', value: selectedFabric.safety }
+                ].map((spec, i) => (
+                  <div key={i} className={`p-6 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'}`}>
+                    <p className="text-xs font-black uppercase tracking-widest text-blue-500 mb-2">{spec.label}</p>
+                    <p className="text-lg font-bold">{spec.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-6">
+                <button
+                  onClick={() => handleDownloadPDF(selectedFabric)}
+                  className="flex-1 px-10 py-6 bg-blue-600 text-white rounded-2xl font-black text-sm tracking-widest shadow-xl hover:bg-blue-700 transition flex justify-center items-center gap-3"
+                >
+                  <Download size={18} /> DOWNLOAD DATASHEET
+                </button>
+                <button
+                  onClick={() => setSampleModalProduct(selectedFabric)}
+                  className={`flex-1 px-10 py-6 rounded-2xl font-black text-sm tracking-widest transition ${darkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                >
+                  REQUEST SAMPLES
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <SampleRequestModal
+        isOpen={!!sampleModalProduct}
+        onClose={() => setSampleModalProduct(null)}
+        product={sampleModalProduct}
+        darkMode={darkMode}
+      />
+
+      <div className="flex justify-center pb-20">
+        <WhatsAppButton
+          label="Connect via WhatsApp"
+          message="Hello, I would like to discuss bulk fabric procurement and partnership opportunities."
+          className="px-12 py-6 rounded-2xl font-black text-base uppercase tracking-widest"
+        />
+      </div>
     </div>
   );
 }

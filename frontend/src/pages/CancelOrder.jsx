@@ -22,10 +22,10 @@ export default function CancelOrder({ mode = 'light' }) {
       setStatus('requesting');
 
       // Request cancellation (this marks it in admin, doesn't delete)
-      const response = await api.post(`/api/orders/${orderId}/request-cancellation`, {
+      await api.post(`/api/orders/${orderId}/request-cancellation`, {
         email: email
       });
-      
+
       setStatus('success');
       setMessage(`✅ Cancellation request submitted! Order #${orderId} has been marked for cancellation. An admin will review and process your request shortly. You'll receive a confirmation email once it's completed.`);
       setOrderId('');
@@ -34,7 +34,7 @@ export default function CancelOrder({ mode = 'light' }) {
     } catch (err) {
       console.error('Cancellation request failed:', err);
       setStatus('error');
-      
+
       if (err.response?.status === 404) {
         setMessage('❌ Order not found. Please check your Order ID.');
       } else if (err.response?.status === 403) {
@@ -48,18 +48,15 @@ export default function CancelOrder({ mode = 'light' }) {
   };
 
   return (
-    <div className={`min-h-screen py-8 sm:py-12 px-4 transition-colors duration-300 ${
-      darkMode ? 'bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950' : 'bg-gray-50'
-    }`}>
-      <div className={`max-w-2xl mx-auto rounded-2xl shadow-2xl p-6 sm:p-8 transition-colors duration-300 ${
-        darkMode ? 'bg-gray-800' : 'bg-white'
+    <div className={`min-h-screen py-8 sm:py-12 px-4 transition-colors duration-300 ${darkMode ? 'bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950' : 'bg-gray-50'
       }`}>
-        
+      <div className={`max-w-2xl mx-auto rounded-2xl shadow-2xl p-6 sm:p-8 transition-colors duration-300 ${darkMode ? 'bg-gray-800' : 'bg-white'
+        }`}>
+
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${
-            darkMode ? 'text-white' : 'text-gray-900'
-          }`}>Cancel Order</h1>
+          <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'
+            }`}>Cancel Order</h1>
           <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
             Request to cancel your order - an admin will review and process it
           </p>
@@ -67,19 +64,15 @@ export default function CancelOrder({ mode = 'light' }) {
 
         {/* Success State */}
         {status === 'success' && (
-          <div className={`rounded-lg p-6 mb-6 text-center ${
-            darkMode ? 'bg-green-900/30' : 'bg-green-50'
-          }`}>
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-              darkMode ? 'bg-green-900/50' : 'bg-green-100'
+          <div className={`rounded-lg p-6 mb-6 text-center ${darkMode ? 'bg-green-900/30' : 'bg-green-50'
             }`}>
-              <CheckCircle className={`w-8 h-8 ${
-                darkMode ? 'text-green-400' : 'text-green-600'
-              }`} />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${darkMode ? 'bg-green-900/50' : 'bg-green-100'
+              }`}>
+              <CheckCircle className={`w-8 h-8 ${darkMode ? 'text-green-400' : 'text-green-600'
+                }`} />
             </div>
-            <p className={`text-lg font-semibold mb-2 ${
-              darkMode ? 'text-green-400' : 'text-green-700'
-            }`}>{message}</p>
+            <p className={`text-lg font-semibold mb-2 ${darkMode ? 'text-green-400' : 'text-green-700'
+              }`}>{message}</p>
             <button
               onClick={() => {
                 setStatus(null);
@@ -94,35 +87,30 @@ export default function CancelOrder({ mode = 'light' }) {
 
         {/* Error State */}
         {status === 'error' && (
-          <div className={`rounded-lg p-6 mb-6 ${
-            darkMode ? 'bg-red-900/30' : 'bg-red-50'
-          }`}>
-            <p className={`text-lg font-semibold ${
-              darkMode ? 'text-red-400' : 'text-red-700'
-            }`}>{message}</p>
+          <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-red-900/30' : 'bg-red-50'
+            }`}>
+            <p className={`text-lg font-semibold ${darkMode ? 'text-red-400' : 'text-red-700'
+              }`}>{message}</p>
           </div>
         )}
 
         {/* Form */}
         {status !== 'success' && (
-          <div className={`rounded-lg p-6 mb-6 ${
-            darkMode ? 'bg-gray-700/50' : 'bg-gray-50'
-          }`}>
+          <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'
+            }`}>
             <div className="space-y-4">
               <div>
-                <label className={`block text-sm font-semibold mb-2 ${
-                  darkMode ? 'text-gray-300' : 'text-gray-700'
-                }`}>Order ID *</label>
+                <label className={`block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>Order ID *</label>
                 <input
                   type="number"
                   value={orderId}
                   onChange={(e) => setOrderId(e.target.value)}
                   disabled={loading}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
                       ? 'bg-gray-600 border-gray-500 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  } disabled:opacity-50`}
+                    } disabled:opacity-50`}
                   placeholder="e.g., 1234"
                 />
                 <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -131,19 +119,17 @@ export default function CancelOrder({ mode = 'light' }) {
               </div>
 
               <div>
-                <label className={`block text-sm font-semibold mb-2 ${
-                  darkMode ? 'text-gray-300' : 'text-gray-700'
-                }`}>Email Address *</label>
+                <label className={`block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>Email Address *</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    darkMode
+                  className={`w-full px-4 py-3 rounded-lg border ${darkMode
                       ? 'bg-gray-600 border-gray-500 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  } disabled:opacity-50`}
+                    } disabled:opacity-50`}
                   placeholder="your@email.com"
                 />
                 <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -153,11 +139,10 @@ export default function CancelOrder({ mode = 'light' }) {
             </div>
 
             {/* Info Box */}
-            <div className={`mt-6 p-4 rounded-lg border ${
-              darkMode
+            <div className={`mt-6 p-4 rounded-lg border ${darkMode
                 ? 'bg-blue-900/20 border-blue-500/30'
                 : 'bg-blue-50 border-blue-200'
-            }`}>
+              }`}>
               <div className="flex gap-3">
                 <AlertCircle className={`w-5 h-5 flex-shrink-0 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                 <div>
@@ -183,11 +168,10 @@ export default function CancelOrder({ mode = 'light' }) {
                   window.location.href = '/';
                 }}
                 disabled={loading}
-                className={`flex-1 py-3 rounded-lg font-semibold transition disabled:opacity-50 ${
-                  darkMode
+                className={`flex-1 py-3 rounded-lg font-semibold transition disabled:opacity-50 ${darkMode
                     ? 'bg-gray-700 text-white hover:bg-gray-600'
                     : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
-                }`}
+                  }`}
               >
                 Back to Home
               </button>

@@ -29,8 +29,8 @@ export default function Navbar({ mode, setMode }) {
   const navLinks = [
     { label: "Home", to: "/" },
     { label: "About", to: "/about" },
-    { label: "Products", to: "/products" },
-    { label: "Shop", to: "/shop" },
+    { label: "Fabric Catalogue", to: "/products" },
+    { label: "Products", to: "/shop" },
     { label: "More", to: "/more" },
     { label: "Contact", to: "/contact" },
   ];
@@ -49,7 +49,7 @@ export default function Navbar({ mode, setMode }) {
       <Divider />
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => setMode(mode === "light" ? "dark" : "light")}> 
+          <ListItemButton onClick={() => setMode(mode === "light" ? "dark" : "light")}>
             <ListItemText primary={mode === "dark" ? "Light Mode" : "Dark Mode"} />
             {mode === "dark" ? <SunIcon style={{ fontSize: 22, marginLeft: 8 }} /> : <MoonIcon style={{ fontSize: 22, marginLeft: 8 }} />}
           </ListItemButton>
@@ -66,8 +66,23 @@ export default function Navbar({ mode, setMode }) {
   return (
     <AppBar position="fixed" color="primary" elevation={4} sx={{ zIndex: 1201 }}>
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          BIM Mills
+        <Typography
+          variant="h6"
+          component={Link}
+          to="/"
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            itemsCenter: "center",
+            gap: 1.5,
+            textDecoration: "none",
+            color: "inherit",
+            fontWeight: 800,
+            letterSpacing: "-0.02em"
+          }}
+        >
+          <img src="/images/logo.jpg" alt="Logo" style={{ height: "40px", width: "auto", borderRadius: "8px" }} />
+          BIM MILLS
         </Typography>
 
         {isMobile ? (
@@ -107,8 +122,8 @@ export default function Navbar({ mode, setMode }) {
               </IconButton>
             </Tooltip>
 
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               color="inherit"
               component={Link}
               to="/admin/login"
