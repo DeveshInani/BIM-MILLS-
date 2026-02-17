@@ -26,7 +26,9 @@ import {
   HandCoins,
   Download,
   Printer,
-  Building2
+  Building2,
+  Search,
+  MapPin
 } from 'lucide-react';
 import {
   XAxis,
@@ -84,6 +86,7 @@ export default function AdminBoard({ mode = 'light' }) {
         {/* Dynamic Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {activeTab === 'dashboard' && <DashboardView darkMode={darkMode} />}
+          {activeTab === 'users' && <UsersView darkMode={darkMode} />}
           {activeTab === 'products' && <ProductsView darkMode={darkMode} />}
           {activeTab === 'email' && <EmailView darkMode={darkMode} />}
           {activeTab === 'billing' && <BillingView darkMode={darkMode} />}
@@ -101,6 +104,7 @@ export default function AdminBoard({ mode = 'light' }) {
 function Sidebar({ activeTab, setActiveTab, darkMode }) {
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { id: 'users', icon: Users, label: 'Customers' },
     { id: 'products', icon: ShoppingBag, label: 'Shop Items' },
     { id: 'email', icon: Mail, label: 'Email Center' },
     { id: 'fabrics', icon: Layers, label: 'Fabric Catalogue' },
@@ -164,6 +168,8 @@ function DashboardView({ darkMode }) {
   const [deleting, setDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [rejectionNote, setRejectionNote] = useState('');
+  const [processingAction, setProcessingAction] = useState(null); // 'approve' or 'reject'
 
   // Fetch function
   const fetchData = async () => {
@@ -187,29 +193,39 @@ function DashboardView({ darkMode }) {
     fetchData();
   }, []);
 
-  const handleDeleteOrder = async () => {
+  const handleProcessCancellation = async (action) => {
     if (!deleteConfirm) return;
+    if (action === 'reject' && !rejectionNote) {
+      alert('Please provide a reason for rejection.');
+      return;
+    }
 
     try {
       setDeleting(true);
-      await api.delete(`/api/orders/${deleteConfirm.id}`);
+      setProcessingAction(action);
 
-      // Update local state
-      setOrders(orders.filter(o => o.id !== deleteConfirm.id));
+      if (deleteConfirm.isRequest) {
+        await api.post(`/api/orders/${deleteConfirm.id}/admin-process-cancellation`, {
+          action: action,
+          note: rejectionNote || (action === 'approve' ? 'Cancellation approved by admin.' : '')
+        });
+      } else {
+        // Simple deletion if not a request
+        await api.delete(`/api/orders/${deleteConfirm.id}`);
+      }
 
       setDeleteSuccess(true);
       setTimeout(() => {
         setDeleteConfirm(null);
         setDeleteSuccess(false);
+        setRejectionNote('');
+        setProcessingAction(null);
       }, 3000);
 
-      // Refresh filtered data
       fetchData();
-
     } catch (err) {
-      console.error('Failed to delete order:', err);
-      alert('Failed to cancel order');
-      setDeleteConfirm(null);
+      console.error('Failed to process cancellation:', err);
+      alert('Failed to process request');
     } finally {
       setDeleting(false);
     }
@@ -453,21 +469,59 @@ function DashboardView({ darkMode }) {
                   </p>
                 )}
 
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setDeleteConfirm(null)}
-                    disabled={deleting}
-                    className={`flex-1 py-3 rounded-lg font-semibold transition ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
-                  >
-                    Keep Order
-                  </button>
-                  <button
-                    onClick={handleDeleteOrder}
-                    disabled={deleting}
-                    className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {deleting ? 'Processing...' : 'Yes, Cancel Order'}
-                  </button>
+                <div className="flex flex-col gap-4">
+                  {deleteConfirm.isRequest && (
+                    <div>
+                      <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">
+                        Admin Note (Required for rejection)
+                      </label>
+                      <textarea
+                        value={rejectionNote}
+                        onChange={(e) => setRejectionNote(e.target.value)}
+                        placeholder="Provide a reason for the user..."
+                        className={`w-full p-3 rounded-xl border text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-200'}`}
+                        rows={3}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    {deleteConfirm.isRequest ? (
+                      <>
+                        <button
+                          onClick={() => handleProcessCancellation('reject')}
+                          disabled={deleting}
+                          className={`flex-1 py-3 rounded-lg font-bold transition ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
+                        >
+                          {deleting && processingAction === 'reject' ? 'Rejecting...' : 'Reject Request'}
+                        </button>
+                        <button
+                          onClick={() => handleProcessCancellation('approve')}
+                          disabled={deleting}
+                          className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                          {deleting && processingAction === 'approve' ? 'Approving...' : 'Approve & Cancel'}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          disabled={deleting}
+                          className={`flex-1 py-3 rounded-lg font-bold transition ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
+                        >
+                          Keep Order
+                        </button>
+                        <button
+                          onClick={() => handleProcessCancellation('delete')}
+                          disabled={deleting}
+                          className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition disabled:opacity-50"
+                        >
+                          {deleting ? 'Deleting...' : 'Confirm Delete'}
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </>
             )}
@@ -2290,6 +2344,104 @@ function VendorPaymentsView({ darkMode, refreshKey, triggerGlobalRefresh }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// --- Users View ---
+function UsersView({ darkMode }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get('/admin/users');
+      setUsers(res.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(u =>
+    u.name?.toLowerCase().includes(search.toLowerCase()) ||
+    u.email?.toLowerCase().includes(search.toLowerCase()) ||
+    u.company_name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (loading) return <div className="flex justify-center items-center h-full"><Loader className="animate-spin w-8 h-8 text-blue-500" /></div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-2xl font-bold">Customer Directory</h3>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
+          <Search size={18} className="text-gray-400" />
+          <input
+            placeholder="Search customers..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-transparent border-none outline-none text-sm w-64"
+          />
+        </div>
+      </div>
+
+      <div className={`overflow-hidden rounded-2xl shadow-sm ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <table className="w-full">
+          <thead className={darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}>
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Customer</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Company</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Location</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Age/DOB</th>
+              <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
+            {filteredUsers.map((user) => (
+              <tr key={user.id} className={darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold">
+                      {user.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-bold">{user.name}</div>
+                      <div className="text-xs text-gray-500">{user.email}</div>
+                      <div className="text-[10px] text-gray-400">{user.phone}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 font-medium text-blue-500">{user.company_name || 'Individual'}</td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <MapPin size={14} />
+                    <span className="truncate max-w-[150px]">{user.address || 'Not set'}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  {user.age ? <span>{user.age} yrs</span> : <span className="text-gray-400">N/A</span>}
+                  <div className="text-[10px] text-gray-400">{user.dob || ''}</div>
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold dark:bg-green-900/30 dark:text-green-400">
+                    Active
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {filteredUsers.length === 0 && (
+              <tr><td colSpan="5" className="p-8 text-center text-gray-500">No customers match your search</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

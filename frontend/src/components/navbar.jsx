@@ -1,67 +1,185 @@
-
-import React from "react";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Link } from "react-router-dom";
-import { SunIcon, MoonIcon } from "./ThemeIcons";
-import useMediaQuery from '@mui/material/useMediaQuery';
+import React, { useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Tooltip,
+  useMediaQuery,
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Avatar,
+  Divider,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  Sun as SunIcon,
+  Moon as MoonIcon,
+  User as UserIcon,
+  ShoppingBag,
+  LogOut,
+  Settings,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from '@mui/material/styles';
 
 
 
 export default function Navbar({ mode, setMode }) {
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Keep original breakpoint logic
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const navigate = useNavigate();
+
+  const userToken = localStorage.getItem("userToken");
+  const userName = localStorage.getItem("userName") || "User";
+  const userLoggedIn = !!userToken;
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userEmail");
+    handleClose();
+    navigate("/");
+    window.location.reload();
+  };
 
   const navLinks = [
     { label: "Home", to: "/" },
     { label: "About", to: "/about" },
-    { label: "Fabric Catalogue", to: "/products" },
-    { label: "Products", to: "/shop" },
-    { label: "More", to: "/more" },
+    { label: "Shop", to: "/shop" },
+    { label: "Fabric", to: "/products" },
     { label: "Contact", to: "/contact" },
   ];
 
-  const drawerContent = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)}>
-      <List>
-        {navLinks.map((item) => (
-          <ListItem key={item.to} disablePadding>
-            <ListItemButton component={Link} to={item.to}>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => setMode(mode === "light" ? "dark" : "light")}>
-            <ListItemText primary={mode === "dark" ? "Light Mode" : "Dark Mode"} />
-            {mode === "dark" ? <SunIcon style={{ fontSize: 22, marginLeft: 8 }} /> : <MoonIcon style={{ fontSize: 22, marginLeft: 8 }} />}
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton component={Link} to="/admin/login">
-            <ListItemText primary="Admin Portal" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Box>
-  );
+  const renderProfileDropdown = () => {
+    const adminToken = localStorage.getItem("adminToken");
+    const userToken = localStorage.getItem("userToken");
+    const userName = localStorage.getItem("userName") || "User";
+    const isLoggedIn = !!(userToken || adminToken);
+
+    if (isLoggedIn) {
+      return (
+        <>
+          <Tooltip title="Profile & Portal">
+            <IconButton onClick={handleMenu} sx={{ ml: 1, p: 0.5, border: '2px solid rgba(255,255,255,0.2)' }}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: adminToken ? 'error.main' : 'secondary.main', fontSize: '1rem' }}>
+                {adminToken ? 'A' : userName.charAt(0).toUpperCase()}
+              </Avatar>
+            </IconButton>
+          </Tooltip>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            PaperProps={{
+              elevation: 4,
+              sx: {
+                width: 220,
+                mt: 1.5,
+                borderRadius: 2,
+                overflow: 'visible',
+              },
+            }}
+          >
+            {/* Show Admin Dashboard if Admin Token exists */}
+            {adminToken && (
+              <MenuItem onClick={() => { handleClose(); navigate("/admin/dashboard"); }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Settings size={18} className="text-blue-500" />
+                  <Typography variant="body2" fontWeight={700}>Admin Dashboard</Typography>
+                </Box>
+              </MenuItem>
+            )}
+
+            {/* Show User links if User Token exists */}
+            {userToken && (
+              <>
+                {adminToken && <Divider />}
+                <MenuItem onClick={() => { handleClose(); navigate("/profile"); }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <UserIcon size={18} />
+                    <Typography variant="body2">My Profile</Typography>
+                  </Box>
+                </MenuItem>
+                <MenuItem onClick={() => { handleClose(); navigate("/my-orders"); }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <ShoppingBag size={18} />
+                    <Typography variant="body2">My Orders</Typography>
+                  </Box>
+                </MenuItem>
+              </>
+            )}
+
+            <Divider />
+            <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <LogOut size={18} />
+                <Typography variant="body2" fontWeight={600}>Logout All</Typography>
+              </Box>
+            </MenuItem>
+          </Menu>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Tooltip title="Login / Signup">
+          <IconButton onClick={handleMenu} sx={{ ml: 1, p: 0.5, border: '2px solid rgba(255,255,255,0.2)' }}>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.light', fontSize: '1rem' }}>
+              <UserIcon size={20} />
+            </Avatar>
+          </IconButton>
+        </Tooltip>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          PaperProps={{
+            elevation: 4,
+            sx: {
+              width: 180,
+              mt: 1.5,
+              borderRadius: 2,
+              overflow: 'visible',
+            },
+          }}
+        >
+          <MenuItem onClick={() => { handleClose(); navigate("/login"); }}>
+            <Typography variant="body2" fontWeight={600}>User Login</Typography>
+          </MenuItem>
+          <MenuItem onClick={() => { handleClose(); navigate("/signup"); }}>
+            <Typography variant="body2" fontWeight={600}>User Sign Up</Typography>
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={() => { handleClose(); navigate("/admin/login"); }}>
+            <Typography variant="body2" color="text.secondary">Admin Portal</Typography>
+          </MenuItem>
+        </Menu>
+      </>
+    );
+  };
 
   return (
     <AppBar position="fixed" color="primary" elevation={4} sx={{ zIndex: 1201 }}>
@@ -72,41 +190,91 @@ export default function Navbar({ mode, setMode }) {
           to="/"
           sx={{
             flexGrow: 1,
-            display: "flex",
-            itemsCenter: "center",
-            gap: 1.5,
             textDecoration: "none",
             color: "inherit",
             fontWeight: 800,
-            letterSpacing: "-0.02em"
+            letterSpacing: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1
           }}
         >
-          <img src="/images/logo.jpg" alt="Logo" style={{ height: "40px", width: "auto", borderRadius: "8px" }} />
-          BIM MILLS
+          <Box sx={{ bgcolor: 'secondary.main', color: 'primary.main', px: 1, borderRadius: 1, fontSize: '0.9rem' }}>BIM</Box>
+          MILLS
         </Typography>
 
         {isMobile ? (
           <>
-            <IconButton
-              color="inherit"
-              edge="end"
-              onClick={() => setDrawerOpen(true)}
-              aria-label="open navigation menu"
-            >
+            <IconButton color="inherit" onClick={() => setMobileOpen(true)}>
               <MenuIcon />
             </IconButton>
             <Drawer
               anchor="right"
-              open={drawerOpen}
-              onClose={() => setDrawerOpen(false)}
+              open={mobileOpen}
+              onClose={() => setMobileOpen(false)}
+              PaperProps={{ sx: { width: 280, bgcolor: 'primary.main', color: 'white' } }}
             >
-              {drawerContent}
+              <Box sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 800 }}>Navigation</Typography>
+                <List>
+                  {navLinks.map((item) => (
+                    <ListItem button key={item.to} component={Link} to={item.to} onClick={() => setMobileOpen(false)}>
+                      <ListItemText primary={item.label} />
+                    </ListItem>
+                  ))}
+                  <Divider sx={{ my: 2, bgcolor: 'rgba(255,255,255,0.1)' }} />
+                  {(userLoggedIn || localStorage.getItem("adminToken")) ? (
+                    <>
+                      {localStorage.getItem("adminToken") && (
+                        <ListItem button component={Link} to="/admin/dashboard" onClick={() => setMobileOpen(false)}>
+                          <ListItemText primary="Admin Dashboard" sx={{ fontWeight: 'bold', color: 'secondary.main' }} />
+                        </ListItem>
+                      )}
+                      {userLoggedIn && (
+                        <>
+                          <ListItem button component={Link} to="/profile" onClick={() => setMobileOpen(false)}>
+                            <ListItemText primary="My Profile" />
+                          </ListItem>
+                          <ListItem button component={Link} to="/my-orders" onClick={() => setMobileOpen(false)}>
+                            <ListItemText primary="My Orders" />
+                          </ListItem>
+                        </>
+                      )}
+                      <ListItem button onClick={handleLogout}>
+                        <ListItemText primary="Logout All" sx={{ color: '#ff4444', fontWeight: 'bold' }} />
+                      </ListItem>
+                    </>
+                  ) : (
+                    <>
+                      <ListItem button component={Link} to="/login" onClick={() => setMobileOpen(false)}>
+                        <ListItemText primary="User Login" />
+                      </ListItem>
+                      <ListItem button component={Link} to="/signup" onClick={() => setMobileOpen(false)}>
+                        <ListItemText primary="User Sign Up" />
+                      </ListItem>
+                      <ListItem button component={Link} to="/admin/login" onClick={() => setMobileOpen(false)}>
+                        <ListItemText primary="Admin Portal" sx={{ color: 'secondary.main' }} />
+                      </ListItem>
+                    </>
+                  )}
+                </List>
+              </Box>
             </Drawer>
           </>
         ) : (
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             {navLinks.map((item) => (
-              <Button key={item.to} color="inherit" component={Link} to={item.to}>
+              <Button
+                key={item.to}
+                color="inherit"
+                component={Link}
+                to={item.to}
+                sx={{
+                  fontWeight: 600,
+                  opacity: 0.8,
+                  '&:hover': { opacity: 1, bgcolor: 'rgba(255,255,255,0.1)' }
+                }}
+              >
                 {item.label}
               </Button>
             ))}
@@ -116,20 +284,14 @@ export default function Navbar({ mode, setMode }) {
                 color="inherit"
                 onClick={() => setMode(mode === "light" ? "dark" : "light")}
                 sx={{ ml: 1 }}
-                aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
               >
-                {mode === "dark" ? <SunIcon style={{ fontSize: 24 }} /> : <MoonIcon style={{ fontSize: 24 }} />}
+                {mode === "dark" ? <SunIcon /> : <MoonIcon />}
               </IconButton>
             </Tooltip>
 
-            <Button
-              variant="outlined"
-              color="inherit"
-              component={Link}
-              to="/admin/login"
-            >
-              Admin Portal
-            </Button>
+            <Box sx={{ width: 1, height: 24, bgcolor: 'rgba(255,255,255,0.2)', mx: 1 }} />
+
+            {renderProfileDropdown()}
           </Box>
         )}
       </Toolbar>

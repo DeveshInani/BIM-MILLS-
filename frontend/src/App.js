@@ -11,6 +11,10 @@ import Shop from "./pages/Shop";
 import More from "./pages/More";
 import Contact from "./pages/Contact";
 import CancelOrder from "./pages/CancelOrder";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Profile from "./pages/Profile";
+import MyOrders from "./pages/MyOrders";
 
 
 // Admin
@@ -46,23 +50,23 @@ function App() {
             }
           />
 
-          <Route 
-  path="/products" 
-  element={
-    <Layout>
-      {(mode) => <Products mode={mode} />}
-    </Layout>
-  } 
-/>
+          <Route
+            path="/products"
+            element={
+              <Layout>
+                {(mode) => <Products mode={mode} />}
+              </Layout>
+            }
+          />
 
-          <Route 
-  path="/shop" 
-  element={
-    <Layout>
-      {(mode) => <Shop mode={mode} />}
-    </Layout>
-  } 
-/>
+          <Route
+            path="/shop"
+            element={
+              <Layout>
+                {(mode) => <Shop mode={mode} />}
+              </Layout>
+            }
+          />
 
           <Route
             path="/more"
@@ -87,6 +91,42 @@ function App() {
             element={
               <Layout>
                 {(mode) => <CancelOrder mode={mode} />}
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              <Layout>
+                {(mode) => <Login mode={mode} />}
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/signup"
+            element={
+              <Layout>
+                {(mode) => <Signup mode={mode} />}
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <Layout>
+                {(mode) => <Profile mode={mode} />}
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/my-orders"
+            element={
+              <Layout>
+                {(mode) => <MyOrders mode={mode} />}
               </Layout>
             }
           />

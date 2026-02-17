@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Float, PerspectiveCamera, Environment, Html, useTexture } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,7 +36,7 @@ const Product3DCard = ({ product, index, onClick }) => {
   // Dynamic colors for each product
   const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
   const color = colors[index % colors.length];
-  
+
   // Load thumbnail texture
   const texture = useTexture('/efab/thumbnail.png', (texture) => {
     texture.wrapS = THREE.RepeatWrapping;
@@ -107,6 +108,7 @@ const ProductScene = ({ product, index, onAddToCart }) => {
 };
 
 export default function Shop({ mode = 'light' }) {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -154,6 +156,27 @@ export default function Shop({ mode = 'light' }) {
     fetchProducts();
   }, []);
 
+  // Fetch user data if logged in to pre-fill form
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('userToken');
+      if (token) {
+        try {
+          const res = await api.get('/users/me');
+          setCheckoutForm({
+            name: res.data.name || '',
+            email: res.data.email || '',
+            phone: res.data.phone || '',
+            address: res.data.address || '',
+          });
+        } catch (err) {
+          console.error("Failed to fetch user data for checkout", err);
+        }
+      }
+    };
+    fetchUserData();
+  }, []);
+
   const darkMode = mode === 'dark';
   const categories = ["All"];
 
@@ -174,7 +197,6 @@ export default function Shop({ mode = 'light' }) {
       const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
 
       const orderPayload = {
-        user_id: null,
         user_name: checkoutForm.name,
         user_email: checkoutForm.email,
         user_phone: checkoutForm.phone,
@@ -570,8 +592,8 @@ export default function Shop({ mode = 'light' }) {
             >
               {/* 3D Canvas */}
               <div className={`relative aspect-square rounded-3xl overflow-hidden backdrop-blur-xl border ${darkMode
-                  ? 'bg-white/5 border-white/10 shadow-2xl shadow-blue-500/10'
-                  : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 shadow-2xl'
+                ? 'bg-white/5 border-white/10 shadow-2xl shadow-blue-500/10'
+                : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 shadow-2xl'
                 } ${index % 2 === 1 ? 'lg:order-2' : ''}`}>
                 <Canvas shadows dpr={[1, 2]}>
                   <ProductScene
@@ -613,8 +635,8 @@ export default function Shop({ mode = 'light' }) {
 
                     {/* Price Display */}
                     <div className={`inline-block px-8 py-4 rounded-2xl mb-8 ${darkMode
-                        ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30'
-                        : 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200'
+                      ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30'
+                      : 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200'
                       }`}>
                       <p className={`text-sm font-bold mb-1 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                         Wholesale Price
@@ -643,8 +665,8 @@ export default function Shop({ mode = 'light' }) {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={`py-4 px-6 rounded-xl font-bold text-sm uppercase tracking-wide transition-all ${darkMode
-                            ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                            : 'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 shadow-md'
+                          ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                          : 'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 shadow-md'
                           }`}
                       >
                         View Details
@@ -655,8 +677,8 @@ export default function Shop({ mode = 'light' }) {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => window.open(`https://wa.me/919890915839?text=${encodeURIComponent(`Inquiry about ${product.name}`)}`, '_blank')}
                         className={`py-4 px-6 rounded-xl font-bold text-sm uppercase tracking-wide transition-all ${darkMode
-                            ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                            : 'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 shadow-md'
+                          ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                          : 'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 shadow-md'
                           }`}
                       >
                         Enquire Now
@@ -738,8 +760,8 @@ export default function Shop({ mode = 'light' }) {
                             <button
                               onClick={() => removeFromCart(item.id)}
                               className={`p-2 rounded-lg transition ${darkMode
-                                  ? 'text-red-400 hover:bg-red-500/10'
-                                  : 'text-red-500 hover:bg-red-50'
+                                ? 'text-red-400 hover:bg-red-500/10'
+                                : 'text-red-500 hover:bg-red-50'
                                 }`}
                             >
                               <Trash2 className="w-5 h-5" />
@@ -751,8 +773,8 @@ export default function Shop({ mode = 'light' }) {
                               <button
                                 onClick={() => updateQuantity(item.id, -item.minOrder)}
                                 className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition ${darkMode
-                                    ? 'bg-white/10 hover:bg-white/20'
-                                    : 'bg-gray-200 hover:bg-gray-300'
+                                  ? 'bg-white/10 hover:bg-white/20'
+                                  : 'bg-gray-200 hover:bg-gray-300'
                                   }`}
                               >
                                 <Minus className="w-4 h-4" />
@@ -764,8 +786,8 @@ export default function Shop({ mode = 'light' }) {
                               <button
                                 onClick={() => updateQuantity(item.id, item.minOrder)}
                                 className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition ${darkMode
-                                    ? 'bg-white/10 hover:bg-white/20'
-                                    : 'bg-gray-200 hover:bg-gray-300'
+                                  ? 'bg-white/10 hover:bg-white/20'
+                                  : 'bg-gray-200 hover:bg-gray-300'
                                   }`}
                               >
                                 <Plus className="w-4 h-4" />
@@ -795,7 +817,15 @@ export default function Shop({ mode = 'light' }) {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setCheckoutStep('info')}
+                      onClick={() => {
+                        const token = localStorage.getItem('userToken');
+                        if (!token) {
+                          alert('Please login to continue with checkout.');
+                          navigate('/login?redirect=/shop');
+                          return;
+                        }
+                        setCheckoutStep('info');
+                      }}
                       disabled={orderLoading}
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-5 rounded-2xl font-black text-base uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-3 shadow-xl shadow-blue-500/30 disabled:opacity-50"
                     >
@@ -826,8 +856,8 @@ export default function Shop({ mode = 'light' }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className={`max-w-5xl mx-auto rounded-3xl p-12 sm:p-16 text-center relative overflow-hidden ${darkMode
-              ? 'bg-gradient-to-br from-blue-900/50 via-purple-900/50 to-blue-900/50 border border-white/10'
-              : 'bg-gradient-to-br from-blue-600 via-purple-600 to-blue-600'
+            ? 'bg-gradient-to-br from-blue-900/50 via-purple-900/50 to-blue-900/50 border border-white/10'
+            : 'bg-gradient-to-br from-blue-600 via-purple-600 to-blue-600'
             } shadow-2xl`}
         >
           {/* Animated Background Elements */}
