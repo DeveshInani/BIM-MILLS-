@@ -17,7 +17,7 @@ const Footer = ({ mode = 'light' }) => {
                             <img src="/images/logo.jpg" alt="BIM Mills Logo" className="h-12 w-auto object-contain rounded-lg shadow-md group-hover:scale-105 transition-transform" />
                             <div className="flex flex-col">
                                 <span className={`text-2xl font-black tracking-tighter ${darkMode ? 'text-white' : 'text-blue-900'}`}>BIM MILLS</span>
-                                <span className={`text-[10px] uppercase font-bold tracking-[0.2em] ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>Textile Excellence</span>
+                                <span className={`text-[10px] uppercase font-bold tracking-[0.2em] ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}></span>
                             </div>
                         </Link>
                         <p className={`text-sm leading-relaxed ${darkMode ? 'text-blue-300/80' : 'text-gray-600'}`}>

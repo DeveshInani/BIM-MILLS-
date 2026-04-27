@@ -18,6 +18,37 @@ import {
 } from "lucide-react";
 import { getEnquiries, deleteEnquiry } from "./api/adminApi";
 
+const parseEnquiryMessage = (enquiry) => {
+  const rawMessage = enquiry?.message || "";
+
+  if (!rawMessage.startsWith("Shop Enquiry")) {
+    return {
+      product: "",
+      qualityAndShade: "",
+      customerMessage: rawMessage,
+    };
+  }
+
+  const lines = rawMessage.split("\n").map((line) => line.trim()).filter(Boolean);
+  const parsed = {
+    product: "",
+    qualityAndShade: "",
+    customerMessage: "",
+  };
+
+  lines.forEach((line) => {
+    if (line.startsWith("Product:")) {
+      parsed.product = line.replace("Product:", "").trim();
+    } else if (line.startsWith("Quality and Shade:")) {
+      parsed.qualityAndShade = line.replace("Quality and Shade:", "").trim();
+    } else if (line.startsWith("Message/Enquiry:")) {
+      parsed.customerMessage = line.replace("Message/Enquiry:", "").trim();
+    }
+  });
+
+  return parsed;
+};
+
 export default function AdminDashboard({ mode = "light" }) {
   const darkMode = mode === "dark";
   const navigate = useNavigate();
@@ -65,6 +96,8 @@ export default function AdminDashboard({ mode = "light" }) {
         (e) =>
           e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           e.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (e.company || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (e.subject || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
           e.phone.includes(searchQuery) ||
           e.message.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -108,7 +141,7 @@ export default function AdminDashboard({ mode = "light" }) {
   /* ---------------- CSV EXPORT ---------------- */
 
   const exportToCSV = () => {
-    const headers = ["Date", "Name", "Phone", "Email", "Message"];
+    const headers = ["Date", "Name", "Phone", "Company", "Subject", "Email", "Message"];
     const csv = [
       headers.join(","),
       ...filteredEnquiries.map((e) =>
@@ -116,6 +149,8 @@ export default function AdminDashboard({ mode = "light" }) {
           new Date(e.created_at).toLocaleString("en-IN"),
           e.name,
           e.phone,
+          e.company || "",
+          e.subject || "",
           e.email,
           `"${e.message}"`,
         ].join(",")
@@ -262,6 +297,9 @@ export default function AdminDashboard({ mode = "light" }) {
                       </td>
                       <td className="p-4">
                         <div className="font-semibold">{e.name}</div>
+                        {e.company && (
+                          <div className="text-xs mt-1 opacity-80">{e.company}</div>
+                        )}
                         <div className="text-xs flex gap-2 items-center mt-1">
                           <Mail className="w-4 h-4" />
                           <span className="truncate max-w-[120px] md:max-w-[200px]" title={e.email}>{e.email}</span>
@@ -271,7 +309,14 @@ export default function AdminDashboard({ mode = "light" }) {
                           <span className="truncate max-w-[120px] md:max-w-[200px]" title={e.phone}>{e.phone}</span>
                         </div>
                       </td>
-                      <td className="p-4 max-w-xs truncate" title={e.message}>{e.message}</td>
+                      <td className="p-4 max-w-xs">
+                        {e.subject && (
+                          <div className="text-xs font-bold text-blue-500 mb-1">{e.subject}</div>
+                        )}
+                        <div className="truncate" title={parseEnquiryMessage(e).customerMessage || e.message}>
+                          {parseEnquiryMessage(e).customerMessage || e.message}
+                        </div>
+                      </td>
                       <td className="p-4 flex gap-2">
                         <button onClick={() => setShowDetails(e)} className={`rounded-full p-2 ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"}`} title="View Details">
                           <Eye className="w-5 h-5" />
@@ -315,27 +360,48 @@ export default function AdminDashboard({ mode = "light" }) {
 
       {/* MODAL */}
       {showDetails && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-2">
-          <div className={`w-full max-w-xl rounded-2xl shadow-2xl p-6 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
-            <h2 className="text-xl font-bold mb-4">Enquiry Details</h2>
-            <DetailRow icon={<User />} label="Name" value={showDetails.name} darkMode={darkMode} />
-            <DetailRow icon={<Mail />} label="Email" value={showDetails.email} darkMode={darkMode} />
-            <DetailRow icon={<Phone />} label="Phone" value={showDetails.phone} darkMode={darkMode} />
-            <DetailRow icon={<Calendar />} label="Date" value={new Date(showDetails.created_at).toLocaleString("en-IN") } darkMode={darkMode} />
-            <DetailRow icon={<MessageSquare />} label="Message" value={showDetails.message} darkMode={darkMode} />
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => setShowDetails(null)}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => handleDelete(showDetails.id)}
-                className="bg-red-600 text-white px-4 rounded-lg font-semibold hover:bg-red-700"
-              >
-                Delete
-              </button>
+        <div className="fixed inset-0 z-[1400] overflow-y-auto bg-black/60 px-2 py-24 sm:py-28">
+          <div className="min-h-full flex items-start justify-center">
+            <div className={`w-full max-w-xl max-h-[calc(100vh-7rem)] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${darkMode ? "bg-gray-900 text-white border border-gray-700" : "bg-white text-gray-900 border border-gray-200"}`}>
+              <div className={`sticky top-0 z-10 px-6 py-5 border-b ${darkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}`}>
+                <h2 className="text-xl font-bold">Enquiry Details</h2>
+              </div>
+              <div className="p-6 overflow-y-auto">
+                {(() => {
+                  const parsedMessage = parseEnquiryMessage(showDetails);
+                  return (
+                    <>
+                      <DetailRow icon={<User />} label="Name" value={showDetails.name} darkMode={darkMode} />
+                      <DetailRow icon={<MessageSquare />} label="Subject" value={showDetails.subject || "General Enquiry"} darkMode={darkMode} />
+                      <DetailRow icon={<User />} label="Company" value={showDetails.company || "Not provided"} darkMode={darkMode} />
+                      <DetailRow icon={<Mail />} label="Email" value={showDetails.email} darkMode={darkMode} />
+                      <DetailRow icon={<Phone />} label="Phone" value={showDetails.phone} darkMode={darkMode} />
+                      <DetailRow icon={<Calendar />} label="Date" value={new Date(showDetails.created_at).toLocaleString("en-IN") } darkMode={darkMode} />
+                      {parsedMessage.product && (
+                        <DetailRow icon={<BarChart3 />} label="Product" value={parsedMessage.product} darkMode={darkMode} />
+                      )}
+                      {parsedMessage.qualityAndShade && (
+                        <DetailRow icon={<MessageSquare />} label="Quality and Shade" value={parsedMessage.qualityAndShade} darkMode={darkMode} />
+                      )}
+                      <DetailRow icon={<MessageSquare />} label="Message" value={parsedMessage.customerMessage || showDetails.message} darkMode={darkMode} />
+                    </>
+                  );
+                })()}
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => setShowDetails(null)}
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => handleDelete(showDetails.id)}
+                    className="bg-red-600 text-white px-4 rounded-lg font-semibold hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -352,7 +418,7 @@ function DetailRow({ icon, label, value, darkMode }) {
       {icon}
       <div>
         <div className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>{label}</div>
-        <div className="font-medium break-words max-w-xs">{value}</div>
+        <div className="font-medium break-words whitespace-pre-wrap max-w-xs">{value}</div>
       </div>
     </div>
   );

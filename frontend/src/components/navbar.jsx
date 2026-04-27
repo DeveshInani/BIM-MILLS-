@@ -65,6 +65,7 @@ export default function Navbar({ mode, setMode }) {
     { label: "About", to: "/about" },
     { label: "Shop", to: "/shop" },
     { label: "Fabric", to: "/products" },
+    { label: "More", to: "/more" },
     { label: "Contact", to: "/contact" },
   ];
 
@@ -184,24 +185,38 @@ export default function Navbar({ mode, setMode }) {
   return (
     <AppBar position="fixed" color="primary" elevation={4} sx={{ zIndex: 1201 }}>
       <Toolbar>
-        <Typography
-          variant="h6"
+        <Box
           component={Link}
           to="/"
           sx={{
             flexGrow: 1,
             textDecoration: "none",
             color: "inherit",
-            fontWeight: 800,
-            letterSpacing: 1,
             display: "flex",
             alignItems: "center",
-            gap: 1
+            gap: 1.5
           }}
         >
-          <Box sx={{ bgcolor: 'secondary.main', color: 'primary.main', px: 1, borderRadius: 1, fontSize: '0.9rem' }}>BIM</Box>
-          MILLS
-        </Typography>
+          <Box
+            component="img"
+            src="/images/logo.jpg"
+            alt="BIM Mills"
+            sx={{
+              width: 44,
+              height: 44,
+              objectFit: "cover",
+              borderRadius: 2,
+              bgcolor: "rgba(255,255,255,0.12)",
+              p: 0.25,
+              boxShadow: "0 10px 24px rgba(0,0,0,0.18)"
+            }}
+          />
+          <Box sx={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+            <Typography sx={{ fontWeight: 800, letterSpacing: 1.2, fontSize: "1rem" }}>
+              BIM MILLS
+            </Typography>
+          </Box>
+        </Box>
 
         {isMobile ? (
           <>

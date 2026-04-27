@@ -28,7 +28,9 @@ import {
   Printer,
   Building2,
   Search,
-  MapPin
+  MapPin,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import {
   XAxis,
@@ -41,8 +43,11 @@ import {
 } from 'recharts';
 import api from '../api/axiosClient';
 
+const FABRIC_FALLBACK_IMAGE = "/images/fabric_logo_generic.png";
+
 export default function AdminBoard({ mode = 'light' }) {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const darkMode = mode === 'dark';
   // Shared refresh key for cross-view updates
   const [refreshKey, setRefreshKey] = useState(0);
@@ -53,7 +58,13 @@ export default function AdminBoard({ mode = 'light' }) {
   return (
     <div className={`flex h-screen overflow-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       {/* Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} darkMode={darkMode} />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        darkMode={darkMode}
+        isCollapsed={isSidebarCollapsed}
+        onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -61,6 +72,17 @@ export default function AdminBoard({ mode = 'light' }) {
         <header className={`h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b z-10 relative ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <h2 className="text-lg sm:text-xl font-bold capitalize truncate">{activeTab}</h2>
           <div className="flex items-center gap-2 sm:gap-4">
+            <button
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              className={`p-2 rounded-full transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+              ) : (
+                <PanelLeftClose className="w-4 h-4 sm:w-5 sm:h-5" />
+              )}
+            </button>
             <button className={`p-2 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
               <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
@@ -101,7 +123,7 @@ export default function AdminBoard({ mode = 'light' }) {
 }
 
 // --- Sidebar Component ---
-function Sidebar({ activeTab, setActiveTab, darkMode }) {
+function Sidebar({ activeTab, setActiveTab, darkMode, isCollapsed, onToggle }) {
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'users', icon: Users, label: 'Customers' },
@@ -115,42 +137,64 @@ function Sidebar({ activeTab, setActiveTab, darkMode }) {
   ];
 
   return (
-    <aside className={`w-64 flex flex-col ${darkMode ? 'bg-gray-800 border-r border-gray-700' : 'bg-white border-r border-gray-200'}`}>
-      <div className="h-16 flex items-center px-8 border-b border-gray-700/10">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-          BIM Mills
-        </h1>
+    <aside className={`${isCollapsed ? 'w-24' : 'w-64'} flex flex-col transition-[width] duration-300 ease-in-out ${darkMode ? 'bg-gray-800 border-r border-gray-700' : 'bg-white border-r border-gray-200'}`}>
+      <div className={`relative h-16 flex items-center border-b border-gray-700/10 ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'}`}>
+        <div className={`flex items-center overflow-hidden ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <img
+            src="/images/logo.jpg"
+            alt="BIM Mills"
+            className="w-10 h-10 rounded-xl object-cover shadow-sm flex-shrink-0"
+          />
+          <div className={`transition-all duration-300 ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[140px] opacity-100'}`}>
+            <h1 className="text-base font-bold whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+              BIM Mills
+            </h1>
+          </div>
+        </div>
+        <button
+          onClick={onToggle}
+          className={`hidden md:flex items-center justify-center w-8 h-8 rounded-full transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'} ${isCollapsed ? 'absolute top-4 right-3' : ''}`}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {isCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+        </button>
       </div>
 
-      <div className="flex-1 py-6 px-4 space-y-2">
+      <div className={`flex-1 py-6 space-y-2 ${isCollapsed ? 'px-2' : 'px-4'}`}>
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
+            title={item.label}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id
               ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
               : darkMode
                 ? 'text-gray-400 hover:bg-gray-700 hover:text-white'
                 : 'text-gray-500 hover:bg-gray-100 hover:text-blue-600'
-              }`}
+              } ${isCollapsed ? 'justify-center px-2' : ''}`}
           >
-            <item.icon className="w-5 h-5" />
-            <span className="font-medium">{item.label}</span>
+            <item.icon className="w-5 h-5 flex-shrink-0" />
+            <span className={`font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100'}`}>
+              {item.label}
+            </span>
           </button>
         ))}
       </div>
 
-      <div className="p-4 border-t border-gray-700/10">
+      <div className={`border-t border-gray-700/10 ${isCollapsed ? 'p-2' : 'p-4'}`}>
         <button
           onClick={() => {
             localStorage.removeItem('adminToken');
             window.location.href = '/admin/login';
           }}
+          title="Logout"
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${darkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'
-            }`}
+            } ${isCollapsed ? 'justify-center px-2' : ''}`}
         >
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">Logout</span>
+          <LogOut className="w-5 h-5 flex-shrink-0" />
+          <span className={`font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[120px] opacity-100'}`}>
+            Logout
+          </span>
         </button>
       </div>
     </aside>
@@ -1298,13 +1342,11 @@ function FabricsView({ darkMode }) {
               <tr key={f.id} className={darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
-                    {f.image ? (
-                      <img src={f.image} alt={f.name} className="w-12 h-12 rounded-lg object-cover shadow-sm" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center">
-                        <Layers className="w-6 h-6 text-gray-400" />
-                      </div>
-                    )}
+                    <img
+                      src={f.image || FABRIC_FALLBACK_IMAGE}
+                      alt={f.name}
+                      className="w-12 h-12 rounded-lg object-cover shadow-sm"
+                    />
                     <div>
                       <h4 className="font-bold text-sm">{f.name}</h4>
                       <div className="flex items-center gap-2 mt-1">
@@ -1931,7 +1973,7 @@ function InvoiceTemplate({ invoice, darkMode, onClose }) {
                     <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">
                       BIM MILLS
                     </h1>
-                    <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-blue-600">Textile Excellence</p>
+                    <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-blue-600"></p>
                   </div>
                 </div>
                 <p className="text-xs font-bold text-gray-800">18/471, INDUSTRIAL ESTATE,</p>

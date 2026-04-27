@@ -15,7 +15,7 @@ import {
 const milestones = [
   { year: "1995", title: "Founded", desc: "BIM Mills established" },
   { year: "2005", title: "Expansion", desc: "New manufacturing facility" },
-  { year: "2015", title: "ISO Certified", desc: "Quality standards achieved" },
+  { year: "2015", title: "Industry Grade Certified", desc: "Quality standards achieved" },
   { year: "2025", title: "National Reach", desc: "15+ states served" }
 ];
 
@@ -304,7 +304,7 @@ export default function About({ mode = 'light' }) {
                         <Award className="w-8 h-8 text-white" />
                       </div>
                       <div>
-                        <div className="text-white font-black text-xl">ISO Certified</div>
+                        <div className="text-white font-black text-xl">Industry Grade certified</div>
                         <div className="text-blue-200 text-sm">Quality Standards</div>
                       </div>
                     </div>
