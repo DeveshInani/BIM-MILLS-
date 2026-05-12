@@ -20,7 +20,11 @@ app = FastAPI()
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"], # Common frontend ports
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:5173",
+        "https://bim-mills.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
