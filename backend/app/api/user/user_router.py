@@ -12,10 +12,12 @@ from app.api.auth.schemas import UserCreate, UserUpdate, UserResponse, LoginUser
 from app.api.user.schemas import EnquiryCreate
 
 import os
+import logging
 from dotenv import load_dotenv
 from app.api.email.send_email import send_user_email, send_admin_email
 
 router = APIRouter(prefix="/users", tags=["Users"])
+logger = logging.getLogger(__name__)
 
 
 # REGISTER USER
@@ -110,6 +112,9 @@ def submit_enquiry(
     # ✅ Send admin email (now loaded from environment variable)
     load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '..', '.env'))
     admin_email = os.getenv("ADMIN_EMAIL")
+    if not admin_email:
+        logger.error("ADMIN_EMAIL is not configured, so admin enquiry notification cannot be sent.")
+
     background_tasks.add_task(
         send_admin_email,
         admin_email,

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db.models import Enquiry, Product, ReadymadeProduct, Order, Employee, User
@@ -38,10 +38,15 @@ class EmailRequest(BaseModel):
     body: str
 
 @router.post("/send-email")
-async def send_email(email_req: EmailRequest):
+async def send_email(email_req: EmailRequest, background_tasks: BackgroundTasks):
     try:
-        await send_custom_email(email_req.to_email, email_req.subject, email_req.body)
-        return {"message": "Email sent successfully"}
+        background_tasks.add_task(
+            send_custom_email,
+            email_req.to_email,
+            email_req.subject,
+            email_req.body,
+        )
+        return {"message": "Email queued successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
