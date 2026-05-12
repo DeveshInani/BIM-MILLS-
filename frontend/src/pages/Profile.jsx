@@ -53,11 +53,11 @@ export default function Profile({ mode = 'light' }) {
     }
 
     return (
-        <div className={`min-h-screen py-24 px-4 transition-colors duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gray-50 text-slate-900'
+        <div className={`min-h-screen py-12 sm:py-20 px-1 sm:px-4 transition-colors duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gray-50 text-slate-900'
             }`}>
             <div className="max-w-4xl mx-auto">
-                <header className="mb-12">
-                    <h1 className="text-4xl font-black mb-2">Account Settings<span className="text-blue-600">.</span></h1>
+                <header className="mb-8 sm:mb-12">
+                    <h1 className="text-3xl sm:text-4xl font-black mb-2">Account Settings<span className="text-blue-600">.</span></h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Manage your profile and business details</p>
                 </header>
 
@@ -95,7 +95,7 @@ export default function Profile({ mode = 'light' }) {
                     <div className="lg:col-span-2">
                         <motion.form
                             onSubmit={handleSave}
-                            className={`p-8 rounded-3xl ${darkMode ? 'bg-gray-900 border border-white/10' : 'bg-white shadow-sm'}`}
+                            className={`p-5 sm:p-8 rounded-[1.75rem] sm:rounded-3xl ${darkMode ? 'bg-gray-900 border border-white/10' : 'bg-white shadow-sm'}`}
                         >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -144,11 +144,11 @@ export default function Profile({ mode = 'light' }) {
                                 </div>
                             </div>
 
-                            <div className="mt-8 flex justify-end">
+                            <div className="mt-8 flex justify-stretch sm:justify-end">
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest flex items-center gap-2 transition-all disabled:opacity-50"
+                                    className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                                 >
                                     {saving ? <Loader className="animate-spin" size={20} /> : <Save size={20} />}
                                     Save Changes

@@ -48,6 +48,7 @@ const FABRIC_FALLBACK_IMAGE = "/images/fabric_logo_generic.png";
 export default function AdminBoard({ mode = 'light' }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const darkMode = mode === 'dark';
   // Shared refresh key for cross-view updates
   const [refreshKey, setRefreshKey] = useState(0);
@@ -56,28 +57,46 @@ export default function AdminBoard({ mode = 'light' }) {
   const triggerGlobalRefresh = () => setRefreshKey((k) => k + 1);
 
   return (
-    <div className={`flex h-screen overflow-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <div className={`relative flex min-h-screen overflow-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      {isMobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+        />
+      )}
       {/* Sidebar */}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setIsMobileSidebarOpen(false);
+        }}
         darkMode={darkMode}
         isCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
+        isMobileSidebarOpen={isMobileSidebarOpen}
       />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className={`h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b z-10 relative ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <header className={`h-16 flex items-center justify-between px-3 sm:px-6 lg:px-8 border-b z-10 relative ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <h2 className="text-lg sm:text-xl font-bold capitalize truncate">{activeTab}</h2>
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-4">
             <button
-              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  setIsMobileSidebarOpen((prev) => !prev);
+                } else {
+                  setIsSidebarCollapsed((prev) => !prev);
+                }
+              }}
               className={`p-2 rounded-full transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
               title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              {isSidebarCollapsed ? (
+              {isMobileSidebarOpen || isSidebarCollapsed ? (
                 <PanelLeftOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
                 <PanelLeftClose className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -86,7 +105,7 @@ export default function AdminBoard({ mode = 'light' }) {
             <button className={`p-2 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
               <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm">
                 A
               </div>
@@ -123,7 +142,7 @@ export default function AdminBoard({ mode = 'light' }) {
 }
 
 // --- Sidebar Component ---
-function Sidebar({ activeTab, setActiveTab, darkMode, isCollapsed, onToggle }) {
+function Sidebar({ activeTab, setActiveTab, darkMode, isCollapsed, onToggle, isMobileSidebarOpen }) {
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'users', icon: Users, label: 'Customers' },
@@ -137,7 +156,7 @@ function Sidebar({ activeTab, setActiveTab, darkMode, isCollapsed, onToggle }) {
   ];
 
   return (
-    <aside className={`${isCollapsed ? 'w-24' : 'w-64'} flex flex-col transition-[width] duration-300 ease-in-out ${darkMode ? 'bg-gray-800 border-r border-gray-700' : 'bg-white border-r border-gray-200'}`}>
+    <aside className={`${isCollapsed ? 'md:w-24' : 'md:w-64'} fixed inset-y-0 left-0 z-40 w-[86vw] max-w-[320px] -translate-x-full flex flex-col transition-transform duration-300 ease-in-out md:static md:z-auto md:max-w-none md:translate-x-0 ${isMobileSidebarOpen ? 'translate-x-0' : ''} ${darkMode ? 'bg-gray-800 border-r border-gray-700' : 'bg-white border-r border-gray-200'}`}>
       <div className={`relative h-16 flex items-center border-b border-gray-700/10 ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'}`}>
         <div className={`flex items-center overflow-hidden ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
           <img

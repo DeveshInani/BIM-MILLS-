@@ -13,16 +13,17 @@ function Layout({ children }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Navbar mode={mode} setMode={setMode} />
+      <div className="min-h-screen flex flex-col">
+        <Navbar mode={mode} setMode={setMode} />
 
-      <div style={{ padding: "16px", paddingTop: "80px", minHeight: "calc(100vh - 400px)" }}>
-        {/* Pass mode as prop to children */}
-        {children && typeof children === 'function'
-          ? children(mode)
-          : children}
+        <main className="flex-1 px-3 pt-20 sm:px-4 sm:pt-24 lg:px-6">
+          {children && typeof children === 'function'
+            ? children(mode)
+            : children}
+        </main>
+
+        <Footer mode={mode} />
       </div>
-
-      <Footer mode={mode} />
     </ThemeProvider>
   );
 }

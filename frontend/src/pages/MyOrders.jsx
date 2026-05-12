@@ -116,9 +116,9 @@ export default function MyOrders({ mode = 'light' }) {
     }
 
     return (
-        <div className={`min-h-screen py-24 px-4 transition-colors duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gray-50 text-slate-900'}`}>
+        <div className={`min-h-screen py-12 sm:py-20 px-1 sm:px-4 transition-colors duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gray-50 text-slate-900'}`}>
             <div className="max-w-6xl mx-auto">
-                <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+                <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 sm:gap-8 mb-10 sm:mb-16">
                     <div>
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
@@ -128,7 +128,7 @@ export default function MyOrders({ mode = 'light' }) {
                             <ShoppingBag size={14} />
                             Customer Portal
                         </motion.div>
-                        <h1 className="text-5xl font-black tracking-tight mb-3">Your Orders<span className="text-blue-600">.</span></h1>
+                        <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-3">Your Orders<span className="text-blue-600">.</span></h1>
                         <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Manage your purchases and track shipments in real-time</p>
                     </div>
 
@@ -165,7 +165,7 @@ export default function MyOrders({ mode = 'light' }) {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`p-24 text-center rounded-[3rem] ${darkMode ? 'bg-gray-900 border border-white/5 shadow-2xl shadow-blue-900/10' : 'bg-white shadow-2xl shadow-gray-200'}`}
+                        className={`p-8 sm:p-16 lg:p-24 text-center rounded-[2rem] sm:rounded-[3rem] ${darkMode ? 'bg-gray-900 border border-white/5 shadow-2xl shadow-blue-900/10' : 'bg-white shadow-2xl shadow-gray-200'}`}
                     >
                         <div className="w-24 h-24 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-8">
                             <Package size={48} className="text-blue-500" />
@@ -196,17 +196,17 @@ export default function MyOrders({ mode = 'light' }) {
                                 {/* Header Card */}
                                 <div
                                     onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-                                    className="p-8 cursor-pointer relative"
+                                    className="p-5 sm:p-8 cursor-pointer relative"
                                 >
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/40">
+                                        <div className="flex items-center gap-4 sm:gap-6">
+                                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/40">
                                                 <Package size={28} />
                                             </div>
                                             <div>
                                                 <p className={`text-xs font-black uppercase tracking-[0.2em] mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Order #ID</p>
                                                 <div className="flex items-center gap-4">
-                                                    <h3 className="text-2xl font-black tracking-tight">{order.id}</h3>
+                                                    <h3 className="text-xl sm:text-2xl font-black tracking-tight">{order.id}</h3>
                                                     <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
                                                         {order.status}
                                                     </div>
@@ -214,7 +214,7 @@ export default function MyOrders({ mode = 'light' }) {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 lg:gap-16">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8 md:gap-12 lg:gap-16">
                                             <div>
                                                 <p className={`text-xs font-black uppercase tracking-widest mb-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Placed On</p>
                                                 <p className="font-bold text-sm">
@@ -247,35 +247,37 @@ export default function MyOrders({ mode = 'light' }) {
                                             transition={{ duration: 0.4, ease: "circOut" }}
                                             className="border-t border-white/5"
                                         >
-                                            <div className="p-8 lg:p-12 space-y-12">
+                                            <div className="p-5 sm:p-8 lg:p-12 space-y-8 sm:space-y-12">
                                                 {/* Tracking Timeline */}
-                                                <div className="relative pt-8 pb-4">
-                                                    <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-500/10 -translate-y-1/2"></div>
-                                                    <div
-                                                        className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 transition-all duration-1000"
-                                                        style={{ width: `${(getStatusStep(order.status) / 4) * 100}%` }}
-                                                    ></div>
+                                                <div className="overflow-x-auto pb-2">
+                                                    <div className="relative min-w-[680px] pt-8 pb-4">
+                                                        <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-500/10 -translate-y-1/2"></div>
+                                                        <div
+                                                            className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 transition-all duration-1000"
+                                                            style={{ width: `${(getStatusStep(order.status) / 4) * 100}%` }}
+                                                        ></div>
 
-                                                    <div className="relative flex justify-between">
-                                                        {trackingSteps.map((step, idx) => {
-                                                            const isCompleted = idx <= getStatusStep(order.status);
-                                                            const isCurrent = idx === getStatusStep(order.status);
-                                                            return (
-                                                                <div key={idx} className="flex flex-col items-center text-center">
-                                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 z-10 ${isCompleted ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : (darkMode ? 'bg-gray-800 text-gray-600' : 'bg-gray-100 text-gray-400')
-                                                                        } ${isCurrent ? 'ring-4 ring-blue-500/20 scale-110' : ''}`}>
-                                                                        <step.icon size={20} />
+                                                        <div className="relative flex justify-between">
+                                                            {trackingSteps.map((step, idx) => {
+                                                                const isCompleted = idx <= getStatusStep(order.status);
+                                                                const isCurrent = idx === getStatusStep(order.status);
+                                                                return (
+                                                                    <div key={idx} className="flex flex-col items-center text-center">
+                                                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 z-10 ${isCompleted ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : (darkMode ? 'bg-gray-800 text-gray-600' : 'bg-gray-100 text-gray-400')
+                                                                            } ${isCurrent ? 'ring-4 ring-blue-500/20 scale-110' : ''}`}>
+                                                                            <step.icon size={20} />
+                                                                        </div>
+                                                                        <p className={`mt-4 text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-blue-500' : 'text-gray-500'}`}>
+                                                                            {step.label}
+                                                                        </p>
                                                                     </div>
-                                                                    <p className={`mt-4 text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-blue-500' : 'text-gray-500'}`}>
-                                                                        {step.label}
-                                                                    </p>
-                                                                </div>
-                                                            );
-                                                        })}
+                                                                );
+                                                            })}
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                                                     {/* Left: Product & Shipping */}
                                                     <div className="space-y-8">
                                                         <div className={`p-6 rounded-3xl ${darkMode ? 'bg-gray-800/40' : 'bg-gray-50/50'}`}>
@@ -326,7 +328,7 @@ export default function MyOrders({ mode = 'light' }) {
                                                         </div>
 
                                                         {/* Action Buttons */}
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <button className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-blue-600 text-white text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition shadow-lg shadow-blue-500/20">
                                                                 <Download size={16} />
                                                                 Invoice
@@ -400,7 +402,7 @@ export default function MyOrders({ mode = 'light' }) {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className={`relative w-full max-w-lg p-8 rounded-[2.5rem] border shadow-2xl ${darkMode ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-100'}`}
+                            className={`relative w-full max-w-lg p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border shadow-2xl ${darkMode ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-100'}`}
                         >
                             <h2 className="text-2xl font-black mb-2">Request Cancellation</h2>
                             <p className={`text-sm mb-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Please tell us why you would like to cancel your order. This helps us improve our service.</p>
@@ -414,7 +416,7 @@ export default function MyOrders({ mode = 'light' }) {
                                     }`}
                             ></textarea>
 
-                            <div className="grid grid-cols-2 gap-4 mt-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                                 <button
                                     onClick={() => setCancelModal({ ...cancelModal, open: false })}
                                     className={`py-4 rounded-2xl font-black uppercase text-xs tracking-widest border-2 ${darkMode ? 'border-white/10' : 'border-gray-100'}`}

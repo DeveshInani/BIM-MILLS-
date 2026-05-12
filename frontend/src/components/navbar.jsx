@@ -184,7 +184,7 @@ export default function Navbar({ mode, setMode }) {
 
   return (
     <AppBar position="fixed" color="primary" elevation={4} sx={{ zIndex: 1201 }}>
-      <Toolbar>
+      <Toolbar sx={{ minHeight: { xs: 72, sm: 80 }, px: { xs: 1, sm: 2 } }}>
         <Box
           component={Link}
           to="/"
@@ -220,20 +220,25 @@ export default function Navbar({ mode, setMode }) {
 
         {isMobile ? (
           <>
-            <IconButton color="inherit" onClick={() => setMobileOpen(true)}>
+            <IconButton color="inherit" onClick={() => setMobileOpen(true)} aria-label="Open navigation menu">
               <MenuIcon />
             </IconButton>
             <Drawer
               anchor="right"
               open={mobileOpen}
               onClose={() => setMobileOpen(false)}
-              PaperProps={{ sx: { width: 280, bgcolor: 'primary.main', color: 'white' } }}
+              PaperProps={{ sx: { width: 'min(88vw, 320px)', bgcolor: 'primary.main', color: 'white' } }}
             >
               <Box sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 800 }}>Navigation</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>Navigation</Typography>
+                  <IconButton color="inherit" onClick={() => setMobileOpen(false)} aria-label="Close navigation menu">
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
                 <List>
                   {navLinks.map((item) => (
-                    <ListItem button key={item.to} component={Link} to={item.to} onClick={() => setMobileOpen(false)}>
+                    <ListItem button key={item.to} component={Link} to={item.to} onClick={() => setMobileOpen(false)} sx={{ borderRadius: 2 }}>
                       <ListItemText primary={item.label} />
                     </ListItem>
                   ))}
@@ -241,33 +246,33 @@ export default function Navbar({ mode, setMode }) {
                   {(userLoggedIn || localStorage.getItem("adminToken")) ? (
                     <>
                       {localStorage.getItem("adminToken") && (
-                        <ListItem button component={Link} to="/admin/dashboard" onClick={() => setMobileOpen(false)}>
+                        <ListItem button component={Link} to="/admin/dashboard" onClick={() => setMobileOpen(false)} sx={{ borderRadius: 2 }}>
                           <ListItemText primary="Admin Dashboard" sx={{ fontWeight: 'bold', color: 'secondary.main' }} />
                         </ListItem>
                       )}
                       {userLoggedIn && (
                         <>
-                          <ListItem button component={Link} to="/profile" onClick={() => setMobileOpen(false)}>
+                          <ListItem button component={Link} to="/profile" onClick={() => setMobileOpen(false)} sx={{ borderRadius: 2 }}>
                             <ListItemText primary="My Profile" />
                           </ListItem>
-                          <ListItem button component={Link} to="/my-orders" onClick={() => setMobileOpen(false)}>
+                          <ListItem button component={Link} to="/my-orders" onClick={() => setMobileOpen(false)} sx={{ borderRadius: 2 }}>
                             <ListItemText primary="My Orders" />
                           </ListItem>
                         </>
                       )}
-                      <ListItem button onClick={handleLogout}>
+                      <ListItem button onClick={handleLogout} sx={{ borderRadius: 2 }}>
                         <ListItemText primary="Logout All" sx={{ color: '#ff4444', fontWeight: 'bold' }} />
                       </ListItem>
                     </>
                   ) : (
                     <>
-                      <ListItem button component={Link} to="/login" onClick={() => setMobileOpen(false)}>
+                      <ListItem button component={Link} to="/login" onClick={() => setMobileOpen(false)} sx={{ borderRadius: 2 }}>
                         <ListItemText primary="User Login" />
                       </ListItem>
-                      <ListItem button component={Link} to="/signup" onClick={() => setMobileOpen(false)}>
+                      <ListItem button component={Link} to="/signup" onClick={() => setMobileOpen(false)} sx={{ borderRadius: 2 }}>
                         <ListItemText primary="User Sign Up" />
                       </ListItem>
-                      <ListItem button component={Link} to="/admin/login" onClick={() => setMobileOpen(false)}>
+                      <ListItem button component={Link} to="/admin/login" onClick={() => setMobileOpen(false)} sx={{ borderRadius: 2 }}>
                         <ListItemText primary="Admin Portal" sx={{ color: 'secondary.main' }} />
                       </ListItem>
                     </>

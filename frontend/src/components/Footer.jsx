@@ -9,7 +9,7 @@ const Footer = ({ mode = 'light' }) => {
     return (
         <footer className={`transition-all duration-500 border-t ${darkMode ? 'bg-slate-950 border-blue-900/50 text-blue-100' : 'bg-white border-blue-100 text-gray-700'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12">
 
                     {/* Brand and About */}
                     <div className="space-y-6">
@@ -57,7 +57,7 @@ const Footer = ({ mode = 'light' }) => {
                     </div>
 
                     {/* Official Address */}
-                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <h4 className={`text-lg font-black mb-6 ${darkMode ? 'text-white' : 'text-blue-900'}`}>Contact Us</h4>
                             <div className="space-y-4">
@@ -97,11 +97,11 @@ const Footer = ({ mode = 'light' }) => {
 
             {/* Footer Bottom */}
             <div className={`py-6 border-t ${darkMode ? 'border-blue-900/30' : 'border-blue-50'}`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start gap-4 md:flex-row md:justify-between md:items-center">
                     <p className={`text-xs font-medium ${darkMode ? 'text-blue-400/60' : 'text-gray-500'}`}>
                         &copy; {currentYear} BIM Mills Pvt. Ltd. All rights reserved.
                     </p>
-                    <div className="flex gap-8">
+                    <div className="flex flex-wrap gap-4 md:gap-8">
                         <Link to="/privacy" className={`text-xs font-medium ${darkMode ? 'text-blue-400/60 hover:text-blue-300' : 'text-gray-500 hover:text-blue-600'}`}>Privacy Policy</Link>
                         <Link to="/terms" className={`text-xs font-medium ${darkMode ? 'text-blue-400/60 hover:text-blue-300' : 'text-gray-500 hover:text-blue-600'}`}>Terms factor</Link>
                     </div>

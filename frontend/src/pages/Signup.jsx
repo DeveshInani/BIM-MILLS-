@@ -51,19 +51,19 @@ export default function Signup({ mode = 'light' }) {
     };
 
     return (
-        <div className={`min-h-screen py-20 px-4 transition-colors duration-300 ${darkMode ? 'bg-slate-950' : 'bg-gray-50'
+        <div className={`min-h-screen py-10 sm:py-16 px-1 sm:px-4 transition-colors duration-300 ${darkMode ? 'bg-slate-950' : 'bg-gray-50'
             }`}>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`w-full max-w-2xl mx-auto p-8 rounded-3xl shadow-2xl ${darkMode ? 'bg-gray-900 border border-white/10' : 'bg-white'
+                className={`w-full max-w-2xl mx-auto p-5 sm:p-8 rounded-[1.75rem] sm:rounded-3xl shadow-2xl ${darkMode ? 'bg-gray-900 border border-white/10' : 'bg-white'
                     }`}
             >
-                <div className="text-center mb-10">
+                <div className="text-center mb-8 sm:mb-10">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/10 text-blue-500 mb-4">
                         <LayoutGrid size={32} />
                     </div>
-                    <h1 className={`text-3xl font-black mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <h1 className={`text-2xl sm:text-3xl font-black mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                         Join BIM Mills<span className="text-blue-600">.</span>
                     </h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
@@ -158,7 +158,7 @@ export default function Signup({ mode = 'light' }) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className={`block text-sm font-bold mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>Age</label>
                                     <input

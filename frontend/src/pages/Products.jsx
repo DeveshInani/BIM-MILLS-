@@ -97,7 +97,7 @@ const SampleRequestModal = ({ isOpen, onClose, product, darkMode }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[150] flex items-center justify-center p-6 backdrop-blur-xl bg-slate-950/80"
+      className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-6 backdrop-blur-xl bg-slate-950/80"
       onClick={onClose}
     >
       <motion.div
@@ -105,7 +105,7 @@ const SampleRequestModal = ({ isOpen, onClose, product, darkMode }) => {
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className={`relative w-full max-w-lg rounded-3xl p-8 shadow-2xl ${darkMode ? 'bg-slate-900 border border-white/10' : 'bg-white'}`}
+        className={`relative w-full max-w-lg rounded-[1.75rem] sm:rounded-3xl p-5 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto ${darkMode ? 'bg-slate-900 border border-white/10' : 'bg-white'}`}
       >
         <button onClick={onClose} className="absolute top-6 right-6 text-slate-400 hover:text-white">
           <X size={24} />
@@ -119,7 +119,7 @@ const SampleRequestModal = ({ isOpen, onClose, product, darkMode }) => {
           </div>
         ) : (
           <>
-            <h3 className="text-3xl font-black mb-2 flex items-center gap-3">
+            <h3 className="text-2xl sm:text-3xl font-black mb-2 flex items-center gap-3">
               <Layers className="text-blue-500" />
               Request Samples
             </h3>
@@ -134,7 +134,7 @@ const SampleRequestModal = ({ isOpen, onClose, product, darkMode }) => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   required
                   type="email"
@@ -328,14 +328,14 @@ export default function Products({ mode = 'light' }) {
   return (
     <div className={`min-h-screen w-full ${darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
       {/* Header */}
-      <div className="py-24 px-8 text-center max-w-7xl mx-auto">
+      <div className="py-12 sm:py-20 px-2 sm:px-6 lg:px-8 text-center max-w-7xl mx-auto">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-6">
             <ShieldCheck size={14} />
             <span className="text-[10px] font-black uppercase tracking-widest">Professional Textile Solutions</span>
           </div>
-          <h1 className="text-7xl font-black mb-6 tracking-tighter uppercase">PRODUCT CATALOGUE<span className="text-blue-600">.</span></h1>
-          <p className={`text-xl max-w-3xl mx-auto leading-relaxed ${darkMode ? 'text-blue-200/50' : 'text-slate-600'}`}>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black mb-6 tracking-tighter uppercase">PRODUCT CATALOGUE<span className="text-blue-600">.</span></h1>
+          <p className={`text-base sm:text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed ${darkMode ? 'text-blue-200/50' : 'text-slate-600'}`}>
             Engineered fabrics for corporate, industrial, and institutional applications.
             Discover our premium range of PV, PC, and specialized blends.
           </p>
@@ -343,7 +343,7 @@ export default function Products({ mode = 'light' }) {
       </div>
 
       {/* Product List - Vertical Alternating Layout */}
-      <div className="max-w-7xl mx-auto px-8 space-y-32 py-12">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 space-y-16 sm:space-y-24 lg:space-y-32 py-8 sm:py-12">
         {products.map((product, index) => {
           const isEven = index % 2 === 0;
           return (
@@ -353,7 +353,7 @@ export default function Products({ mode = 'light' }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-24 items-center`}
+              className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-8 sm:gap-12 lg:gap-24 items-center`}
             >
               {/* Visual Side */}
               <div className="w-full lg:w-1/2 aspect-square relative group">
@@ -368,7 +368,7 @@ export default function Products({ mode = 'light' }) {
               {/* Content Side */}
               <div className="w-full lg:w-1/2 text-left">
                 <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex flex-wrap items-center gap-3 mb-6">
                     <span className="px-4 py-1.5 bg-blue-600 rounded-full text-white text-[10px] font-black uppercase tracking-widest">
                       {product.category}
                     </span>
@@ -379,21 +379,21 @@ export default function Products({ mode = 'light' }) {
                     )}
                   </div>
 
-                  <h2 className="text-6xl font-black mb-6 tracking-tight leading-none uppercase">{product.title}</h2>
-                  <p className={`text-xl leading-relaxed mb-8 ${darkMode ? 'text-white/60' : 'text-slate-600'}`}>
+                  <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black mb-6 tracking-tight leading-none uppercase">{product.title}</h2>
+                  <p className={`text-base sm:text-lg lg:text-xl leading-relaxed mb-8 ${darkMode ? 'text-white/60' : 'text-slate-600'}`}>
                     {product.desc}
                   </p>
 
-                  <div className="grid grid-cols-3 gap-4 mb-8">
-                    <div className={`px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div className={`px-4 sm:px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
                       <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">GSM</p>
                       <p className="text-lg font-black">{product.gsm || 'N/A'}</p>
                     </div>
-                    <div className={`px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
+                    <div className={`px-4 sm:px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
                       <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Width</p>
                       <p className="text-lg font-black">{product.width || 'N/A'}</p>
                     </div>
-                    <div className={`px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
+                    <div className={`px-4 sm:px-5 py-4 rounded-2xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100 border border-slate-200'} transition-transform hover:scale-105`}>
                       <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Blend</p>
                       <p className="text-xs font-black uppercase">{product.composition || 'Premium'}</p>
                     </div>
@@ -435,16 +435,16 @@ export default function Products({ mode = 'light' }) {
       </div>
 
       {/* Fabric Genuineness Section */}
-      <div className="max-w-7xl mx-auto px-8 pb-20 mt-20">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pb-16 sm:pb-20 mt-16 sm:mt-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className={`rounded-3xl p-12 ${darkMode ? 'bg-slate-900/50 border border-white/10' : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'}`}
+          className={`rounded-[2rem] sm:rounded-3xl p-6 sm:p-10 lg:p-12 ${darkMode ? 'bg-slate-900/50 border border-white/10' : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'}`}
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-start sm:items-center gap-3 mb-6">
             <ShieldCheck className="text-blue-600" size={32} />
-            <h2 className={`text-4xl font-black ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+            <h2 className={`text-2xl sm:text-4xl font-black ${darkMode ? 'text-white' : 'text-slate-900'}`}>
               Why Trust Our Fabrics?
             </h2>
           </div>
@@ -472,8 +472,8 @@ export default function Products({ mode = 'light' }) {
       {/* Tech Specs Modal */}
       <AnimatePresence>
         {selectedFabric && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-2xl bg-slate-950/90" onClick={() => setSelectedFabric(null)}>
-            <motion.div initial={{ scale: 0.9, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 50 }} onClick={(e) => e.stopPropagation()} className={`relative w-full max-w-4xl rounded-3xl p-12 shadow-2xl ${darkMode ? 'bg-slate-900 border border-white/10' : 'bg-white'}`}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 backdrop-blur-2xl bg-slate-950/90" onClick={() => setSelectedFabric(null)}>
+            <motion.div initial={{ scale: 0.9, y: 50 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 50 }} onClick={(e) => e.stopPropagation()} className={`relative w-full max-w-4xl rounded-[1.75rem] sm:rounded-3xl p-5 sm:p-8 lg:p-12 shadow-2xl max-h-[90vh] overflow-y-auto ${darkMode ? 'bg-slate-900 border border-white/10' : 'bg-white'}`}>
               <button onClick={() => setSelectedFabric(null)} className="absolute top-6 right-6 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition"><X size={20} /></button>
 
               <div className="flex items-center gap-3 mb-6">
@@ -481,9 +481,9 @@ export default function Products({ mode = 'light' }) {
                 <span className="px-4 py-1.5 bg-blue-600/20 border border-blue-500/20 text-blue-500 rounded-full text-xs font-black uppercase tracking-widest">{selectedFabric.category}</span>
               </div>
 
-              <h2 className="text-5xl font-black mb-6 tracking-tight">{selectedFabric.title}<span className="text-blue-600">.</span></h2>
+              <h2 className="text-3xl sm:text-5xl font-black mb-6 tracking-tight">{selectedFabric.title}<span className="text-blue-600">.</span></h2>
 
-              <div className="grid grid-cols-2 gap-6 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-12">
                 {[
                   { label: 'Fabric Weight (GSM)', value: selectedFabric.gsm },
                   { label: 'Material Composition', value: selectedFabric.composition },
@@ -498,16 +498,16 @@ export default function Products({ mode = 'light' }) {
                 ))}
               </div>
 
-              <div className="flex gap-6">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                 <button
                   onClick={() => handleDownloadPDF(selectedFabric)}
-                  className="flex-1 px-10 py-6 bg-blue-600 text-white rounded-2xl font-black text-sm tracking-widest shadow-xl hover:bg-blue-700 transition flex justify-center items-center gap-3"
+                  className="flex-1 px-6 sm:px-10 py-4 sm:py-6 bg-blue-600 text-white rounded-2xl font-black text-xs sm:text-sm tracking-widest shadow-xl hover:bg-blue-700 transition flex justify-center items-center gap-3"
                 >
                   <Download size={18} /> DOWNLOAD DATASHEET
                 </button>
                 <button
                   onClick={() => setSampleModalProduct(selectedFabric)}
-                  className={`flex-1 px-10 py-6 rounded-2xl font-black text-sm tracking-widest transition ${darkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                  className={`flex-1 px-6 sm:px-10 py-4 sm:py-6 rounded-2xl font-black text-xs sm:text-sm tracking-widest transition ${darkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                 >
                   REQUEST SAMPLES
                 </button>
@@ -524,11 +524,11 @@ export default function Products({ mode = 'light' }) {
         darkMode={darkMode}
       />
 
-      <div className="flex justify-center pb-20">
+      <div className="flex justify-center pb-12 sm:pb-20">
         <WhatsAppButton
           label="Connect via WhatsApp"
           message="Hello, I would like to discuss bulk fabric procurement and partnership opportunities."
-          className="px-12 py-6 rounded-2xl font-black text-base uppercase tracking-widest"
+          className="px-6 sm:px-12 py-4 sm:py-6 rounded-2xl font-black text-sm sm:text-base uppercase tracking-widest"
         />
       </div>
     </div>
