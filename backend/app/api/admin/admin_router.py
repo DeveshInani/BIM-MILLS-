@@ -38,15 +38,14 @@ class EmailRequest(BaseModel):
     body: str
 
 @router.post("/send-email")
-async def send_email(email_req: EmailRequest, background_tasks: BackgroundTasks):
+async def send_email(email_req: EmailRequest):
     try:
-        background_tasks.add_task(
-            send_custom_email,
+        await send_custom_email(
             email_req.to_email,
             email_req.subject,
             email_req.body,
         )
-        return {"message": "Email queued successfully"}
+        return {"message": "Email sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
