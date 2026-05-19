@@ -6,31 +6,32 @@ from alembic import context
 import sys
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from app.api.core.config import settings
 from app.db.database import Base
 # Import all models here so Alembic can see them for autogenerate
 from app.db.models import Admin, User, Enquiry, Product, ReadymadeProduct, Order, Sales, Employee, Invoice, Vendor, VendorPayment, PaymentReminder
 
 config = context.config
 
-load_dotenv(Path(__file__).parent.parent / ".env")
-
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-database_url = URL.create(
-    drivername="mysql+pymysql",
-    username=os.getenv("MYSQL_USER"),
-    password=os.getenv("MYSQL_PASSWORD"),
-    host=os.getenv("MYSQL_HOST", "127.0.0.1"),
-    port=int(os.getenv("MYSQL_PORT", "3306")),
-    database=os.getenv("MYSQL_DB"),
-)
-config.set_main_option("sqlalchemy.url", database_url.render_as_string(hide_password=False))
+database_url = settings.DATABASE_URL
+if not database_url:
+    database_url = URL.create(
+        drivername="mysql+pymysql",
+        username=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        host=os.getenv("MYSQL_HOST", "127.0.0.1"),
+        port=int(os.getenv("MYSQL_PORT", "3306")),
+        database=os.getenv("MYSQL_DB"),
+    ).render_as_string(hide_password=False)
+
+config.set_main_option("sqlalchemy.url", database_url)
 
 target_metadata = Base.metadata
 

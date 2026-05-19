@@ -12,6 +12,7 @@ from app.api.email.send_email import (
     send_user_email,
     send_admin_email
 )
+from app.api.core.config import settings
 from app.api.email.templates import (
     order_confirmation_template, 
     cancellation_confirmation_template,
@@ -229,8 +230,7 @@ def request_cancellation(
     background_tasks.add_task(send_user_email, order.user_email, user_email_html)
 
     # ✅ Send Alert to Admin
-    import os
-    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_email = settings.ADMIN_EMAIL
     admin_email_html = admin_cancellation_alert_template(
         order_id=order.id,
         user_name=order.user_name,

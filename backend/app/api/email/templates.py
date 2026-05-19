@@ -1,4 +1,12 @@
 
+from app.api.core.config import settings
+
+
+def _build_cancel_order_url() -> str:
+    base_url = settings.WEBSITE_DOMAIN.rstrip("/")
+    return f"{base_url}/cancel-order"
+
+
 def user_success_template(name):
     return f"""
     <html>
@@ -55,6 +63,7 @@ def admin_notification_template(data):
     </html>
     """
 def order_confirmation_template(name, order_id, products, quantity, phone, address, amount):
+    cancel_order_url = _build_cancel_order_url()
     return f"""
     <html>
       <body style="font-family:Arial;background:#f4f6f8;padding:30px;">
@@ -112,7 +121,7 @@ def order_confirmation_template(name, order_id, products, quantity, phone, addre
             <strong>Want to cancel this order?</strong>
             <p style="margin:10px 0;">If you need to cancel your order, click the button below:</p>
             <p style="text-align:center;margin:15px 0;">
-              <a href="http://localhost:3000/cancel-order" style="background:#d32f2f;color:white;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">Cancel Order</a>
+              <a href="{cancel_order_url}" style="background:#d32f2f;color:white;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">Cancel Order</a>
             </p>
             <p style="margin:10px 0;font-size:12px;">You'll need your Order ID (<strong>#{order_id}</strong>) and this email address to request cancellation.</p>
           </div>

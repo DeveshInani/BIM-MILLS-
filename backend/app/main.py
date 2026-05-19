@@ -13,6 +13,7 @@ from app.api.sales.sales_router import router as sales_router
 from app.api.payments.invoice_router import router as invoice_router
 from app.api.payments.vendor_router import router as vendor_router
 from app.api.payments.vendor_payment_router import router as vendor_payment_router
+from app.api.core.config import settings
 import os
 
 app = FastAPI()
@@ -20,12 +21,8 @@ app = FastAPI()
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:5173",
-        "https://bim-mills.vercel.app"
-    ],
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origin_regex=settings.BACKEND_CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

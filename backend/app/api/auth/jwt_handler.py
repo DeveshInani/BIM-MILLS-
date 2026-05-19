@@ -1,12 +1,9 @@
-import os
 from datetime import datetime, timedelta
 from jose import jwt
-from dotenv import load_dotenv
-
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '..', '.env'))
+from app.api.core.config import settings
 
 # Load from environment variable with a fallback for development (though fallback is not recommended for prod)
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "DEVELOPMENT_SECRET_KEY_REPLACE_IN_PROD")
+SECRET_KEY = settings.JWT_SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 1 hour
 

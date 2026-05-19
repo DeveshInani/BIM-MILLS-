@@ -1,6 +1,6 @@
-import asyncio
 from app.api.email.templates import user_success_template
 from app.api.email.templates import admin_notification_template
+from app.api.core.config import settings
 
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -11,9 +11,7 @@ from app.api.auth.jwt_handler import create_access_token
 from app.api.auth.schemas import UserCreate, UserUpdate, UserResponse, LoginUserSchema
 from app.api.user.schemas import EnquiryCreate
 
-import os
 import logging
-from dotenv import load_dotenv
 from app.api.email.send_email import send_user_email, send_admin_email
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -110,8 +108,7 @@ def submit_enquiry(
     )
 
     # ✅ Send admin email (now loaded from environment variable)
-    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '..', '.env'))
-    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_email = settings.ADMIN_EMAIL
     if not admin_email:
         logger.error("ADMIN_EMAIL is not configured, so admin enquiry notification cannot be sent.")
 
